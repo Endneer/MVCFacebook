@@ -72,7 +72,7 @@ namespace MVCFacebook
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            //DataSeed.SeedDatabase(context, um);
+            //DataSeed.SeedDatabase(context, um).Wait();
         }
     }
 }

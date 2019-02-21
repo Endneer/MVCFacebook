@@ -21,8 +21,9 @@ namespace MVCFacebook.Models
         public virtual ICollection<UserComment> Comments { get; set; }
         public virtual ICollection<UserLike> Likes { get; set; }
         public virtual ICollection<Post> Posts { get; set; }
-        
-        public ApplicationUser() {
+
+        public ApplicationUser()
+        {
             Comments = new HashSet<UserComment>();
             Likes = new HashSet<UserLike>();
             FriendRequestsSent = new HashSet<Friendship>();
@@ -30,11 +31,13 @@ namespace MVCFacebook.Models
         }
 
         [NotMapped]
-        public ICollection<ApplicationUser> Friends { get =>
-                FriendRequestsSent.Where(F => !F.Pending).Select(F => F.User2)
-                .Union(FriendRequestsRecieved.Where(F => !F.Pending).Select(F => F.User1))
-                .ToList();
-                }
+        public ICollection<ApplicationUser> Friends
+        {
+            get =>
+FriendRequestsSent.Where(F => !F.Pending).Select(F => F.User2)
+.Union(FriendRequestsRecieved.Where(F => !F.Pending).Select(F => F.User1))
+.ToList();
+        }
 
         public void loadFriendships(Data.ApplicationDbContext context)
         {
@@ -50,7 +53,8 @@ namespace MVCFacebook.Models
             }
         }
 
-        public bool requestFriendship(Data.ApplicationDbContext context,ApplicationUser user) {
+        public bool requestFriendship(Data.ApplicationDbContext context, ApplicationUser user)
+        {
             loadFriendships(context);
             if (Friends.Contains(user))
             {
@@ -67,7 +71,7 @@ namespace MVCFacebook.Models
             return FriendRequestsRecieved.Where(F => F.Pending).ToList();
         }
 
-        public bool confirmFriendship(Data.ApplicationDbContext context,Friendship request)
+        public bool confirmFriendship(Data.ApplicationDbContext context, Friendship request)
         {
             if (getPendingFriendRequests(context).Contains(request))
             {
@@ -79,7 +83,7 @@ namespace MVCFacebook.Models
         }
 
 
-        public void denyFriendship(Data.ApplicationDbContext context ,Friendship request)
+        public void denyFriendship(Data.ApplicationDbContext context, Friendship request)
         {
             loadFriendships(context);
             FriendRequestsRecieved.Remove(request);
@@ -88,26 +92,42 @@ namespace MVCFacebook.Models
 
         public void createPost(String postText, Data.ApplicationDbContext context)
         {
-            Posts.Add(new Post() {
+            context.Entry(this).Collection(u => u.Posts).Load();
+            Posts.Add(new Post()
+            {
                 Text = postText,
                 CreationDate = DateTime.Now,
-                Creator = this,               
+                Creator = this,
             });
             context.SaveChanges();
         }
 
-        public void deletePost(Post tobeDeleted, Data.ApplicationDbContext context)
+        public bool deletePost(Post tobeDeleted, Data.ApplicationDbContext context)
         {
             context.Entry(this).Collection(u => u.Posts).Load();
-            Posts.Remove(tobeDeleted);
-            context.SaveChanges();
+            if (Posts.Any(P => P.ID == tobeDeleted.ID))
+            {
+                context.Entry(tobeDeleted).Collection(p => p.Likes).Load();
+                context.Entry(tobeDeleted).Collection(p => p.Comments).Load();
+                tobeDeleted.Likes.Clear();
+                tobeDeleted.Comments.Clear();
+                Posts.Remove(tobeDeleted);
+                context.Posts.Remove(tobeDeleted);
+                context.SaveChanges();
+                return true;
+            }
+            return false;
         }
 
         public bool commentOnPost(Post p, Data.ApplicationDbContext context, String commentText)
         {
-            if (context.Posts.Contains(p))
+
+            ;
+            if (context.Posts.Any(po => po.ID == p.ID))
             {
-                p.Comments.Add(new UserComment() {
+                context.Entry(p).Collection(post => post.Comments).Load();
+                p.Comments.Add(new UserComment()
+                {
                     CommentedPost = p,
                     CommentingUser = this,
                     CommentText = commentText,
@@ -116,10 +136,10 @@ namespace MVCFacebook.Models
                 context.SaveChanges();
                 return true;
             }
-                return false;
+            return false;
         }
 
-        public bool deleteComment(UserComment comment,Data.ApplicationDbContext context)
+        public bool deleteComment(UserComment comment, Data.ApplicationDbContext context)
         {
             context.Entry(comment).Reference(c => c.CommentingUser).Load();
             if (comment.CommentingUser.Id == Id)
@@ -132,26 +152,22 @@ namespace MVCFacebook.Models
             return false;
         }
 
-        public bool toggleLike(Post post,Data.ApplicationDbContext context)
+        public bool toggleLike(Post post, Data.ApplicationDbContext context)
         {
             context.Entry(post).Collection(p => p.Likes).Load();
-            bool found = false;
-            foreach(UserLike like in post.Likes)
-            {
-                if(like.UserID == Id)
-                {
-                    post.Likes.Remove(like);
-                    found = true;
-                }
-            }
+            UserLike foundLike = post.Likes.FirstOrDefault(L => L.UserID == Id);
 
-            if (!found)
-                post.Likes.Add(new UserLike() {
+            if (foundLike == null)
+                post.Likes.Add(new UserLike()
+                {
                     LikingUser = this,
                     LikedPost = post
                 });
+            else
+                post.Likes.Remove(foundLike);
+
             context.SaveChanges();
-            return found;
+            return foundLike != null;
         }
 
     }

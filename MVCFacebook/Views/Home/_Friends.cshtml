@@ -5,7 +5,7 @@
 
 @foreach (var item in Model)
 {
-    <a asp-action="Profile" asp-route-id="@item.UserName">@item.UserName</a>
+    <a asp-action="Profile" asp-route-username="@item.UserName">@item.UserName</a>
 }
 
 <p>Hello fucking world</p>

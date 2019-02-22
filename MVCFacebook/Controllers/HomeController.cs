@@ -27,6 +27,10 @@ namespace MVCFacebook.Controllers
         [Authorize]
         public IActionResult Index()
         {
+            ApplicationUser loggedUser = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
+            loggedUser.loadFriendships(context);
+            var friends = loggedUser.Friends.Select(x => x.Id);
+            ViewBag.posts = (context.Posts.Where(x => x.Creator.Id == signInManager.UserManager.GetUserId(HttpContext.User) || friends.Contains(x.Creator.Id)).OrderByDescending(y => y.CreationDate));
             return View();
         }
 
@@ -74,6 +78,17 @@ namespace MVCFacebook.Controllers
                 modelUserID = context.Users.FirstOrDefault(u => u.UserName == userName).Id;
             }
             ApplicationUser modelUser = context.Users.FirstOrDefault(u => u.Id == modelUserID);
+
+
+            if (userName == null) //Viewing my profile
+            {
+                var UsersRequestingFriendship = modelUser.getPendingFriendRequests(context).Select(u => u.User1).ToList();
+                ViewBag.UsersRequestingFriendship = UsersRequestingFriendship;
+            }
+            else //Viewing someone else profile
+            {
+                ViewBag.UsersRequestingFriendship = new List<ApplicationUser>();
+            }
             var friends = modelUser.Friends;
 
 
@@ -84,16 +99,34 @@ namespace MVCFacebook.Controllers
 
                 context.Users.FirstOrDefault(i => i.UserName == "Test5@Email.com").confirmFriendship(context,
                     context.Users.FirstOrDefault(i => i.UserName == "Test5@Email.com").FriendRequestsRecieved.FirstOrDefault());
+
+
+
+                context.Users.FirstOrDefault(u => u.UserName == "Test4@Email.com").requestFriendship(context, modelUser);
             }
             catch (Exception)
             {
 
-                throw;
             }
             #endregion
 
 
             return View(modelUser);
         }
+
+        [Authorize]
+        public IActionResult addPost(Post po)
+        {
+            if (po.Text != null && po.Text.Length > 0)
+            {
+                po.CreationDate = DateTime.Now;
+                po.Creator = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
+                context.Posts.Add(po);
+                context.SaveChanges();
+
+            }
+            return RedirectToAction("Index");
+        }
+
     }
 }

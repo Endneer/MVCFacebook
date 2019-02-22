@@ -2,6 +2,18 @@
     ViewData["Title"] = "Home Page";
 }
 
+@* Bahy's code, don't forget to put it in a partial view *@
+@model Post
+<div>
+    <form method="post">
+        <textarea placeholder="what's in your mind!!" asp-for="Text"></textarea>
+        <input type="submit" value="Post" asp-action="addPost" asp-controller="home" />
+    </form>
+    <partial name="_listPosts" />
+</div>
+@* End of Bahy's code *@
+
+
 <div id="myCarousel" class="carousel slide" data-ride="carousel" data-interval="6000">
     <ol class="carousel-indicators">
         <li data-target="#myCarousel" data-slide-to="0" class="active"></li>

@@ -57,19 +57,43 @@ namespace MVCFacebook.Controllers
 
 
         [Authorize]
-        public IActionResult Profile(int? id)
+        public IActionResult Profile(string userName)
         {
-            if (id == null)
+
+
+            string modelUserID;
+            if (userName == null)
             {
                 //logged in user
-                var loggedInUserID = signInManager.UserManager.GetUserId(User);
-                var friends = context.Users.Where(u => u.Id == loggedInUserID).FirstOrDefault().Friends;
+                modelUserID = signInManager.UserManager.GetUserId(User);
             }
+
             else
             {
                 //user profile with the entered id
+                modelUserID = context.Users.FirstOrDefault(u => u.UserName == userName).Id;
             }
-            return View();
+            ApplicationUser modelUser = context.Users.FirstOrDefault(u => u.Id == modelUserID);
+            var friends = modelUser.Friends;
+
+
+            #region add dummy friendship between logged in user and test5 to test friends partial veiw
+            try
+            {
+                modelUser.requestFriendship(context, context.Users.FirstOrDefault(i => i.UserName == "Test5@Email.com"));
+
+                context.Users.FirstOrDefault(i => i.UserName == "Test5@Email.com").confirmFriendship(context,
+                    context.Users.FirstOrDefault(i => i.UserName == "Test5@Email.com").FriendRequestsRecieved.FirstOrDefault());
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            #endregion
+
+
+            return View(modelUser);
         }
     }
 }

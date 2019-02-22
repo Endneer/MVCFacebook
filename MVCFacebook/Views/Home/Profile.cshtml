@@ -8,4 +8,7 @@
 <div><partial name="_FriendRequests.cshtml" model="@ViewBag.UsersRequestingFriendship" /></div>
 <div><partial name="_Friends.cshtml" model="Model.Friends" /></div>
 
-
+@if (!Model.Friends.Contains(ViewBag.LoggedInUser))
+{
+    <div><input type="submit" value="AddFriend" style="visibility:visible"/></div>
+}

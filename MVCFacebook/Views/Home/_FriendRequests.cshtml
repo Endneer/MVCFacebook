@@ -2,8 +2,11 @@
 @*
     For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 *@
-
-@foreach (var item in Model)
-{
-    <a asp-action="Profile" asp-route-id="@item.UserName">@item.UserName</a>
-}
+<form method="post">
+    @foreach (var item in Model)
+    {
+        <a asp-action="Profile" asp-route-username="@item.UserName">@item.UserName</a>
+        <input type="submit" value=Accept asp-route-id="@item.Id" asp-action="AcceptFriendRequest" />
+        <input type="submit" value=Reject asp-route-id="@item.Id" asp-action="RejectFriendRequest" />
+    }
+</form>

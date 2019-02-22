@@ -84,9 +84,12 @@ namespace MVCFacebook.Controllers
             {
                 var UsersRequestingFriendship = modelUser.getPendingFriendRequests(context).Select(u => u.User1).ToList();
                 ViewBag.UsersRequestingFriendship = UsersRequestingFriendship;
+                ViewBag.LoggedInUser = modelUser;
             }
             else //Viewing someone else profile
             {
+                ViewBag.LoggedInUser = null;
+
                 ViewBag.UsersRequestingFriendship = new List<ApplicationUser>();
             }
             var friends = modelUser.Friends;
@@ -103,13 +106,13 @@ namespace MVCFacebook.Controllers
 
 
                 context.Users.FirstOrDefault(u => u.UserName == "Test4@Email.com").requestFriendship(context, modelUser);
+                context.Users.FirstOrDefault(u => u.UserName == "Test3@Email.com").requestFriendship(context, modelUser);
             }
             catch (Exception)
             {
 
             }
             #endregion
-
 
             return View(modelUser);
         }
@@ -126,6 +129,34 @@ namespace MVCFacebook.Controllers
 
             }
             return RedirectToAction("Index");
+        }
+        [HttpPost]
+        public IActionResult AcceptFriendRequest(string id)
+        {
+
+            string loggedInUserID = signInManager.UserManager.GetUserId(User);
+            var loggedInUser = context.Users.FirstOrDefault(u => u.Id == loggedInUserID);
+
+            loggedInUser.loadFriendships(context);
+
+            loggedInUser.confirmFriendship(context,
+                loggedInUser.FriendRequestsRecieved.FirstOrDefault(u => u.User1ID == id));
+
+            return RedirectToAction("Profile");
+        }
+
+        public IActionResult RejectFriendRequest(string id)
+        {
+
+            string loggedInUserID = signInManager.UserManager.GetUserId(User);
+            var loggedInUser = context.Users.FirstOrDefault(u => u.Id == loggedInUserID);
+
+            loggedInUser.loadFriendships(context);
+
+            loggedInUser.denyFriendship(context,
+                loggedInUser.FriendRequestsRecieved.FirstOrDefault(u => u.User1ID == id));
+
+            return RedirectToAction("Profile");
         }
 
     }

@@ -126,7 +126,7 @@ namespace MVCProjectModelAuthentication.Controllers
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
-            return RedirectToAction(nameof(HomeController.Index), "Home");
+            return RedirectToAction(nameof(UserController.Index), "Home");
         }
 
         #region Helpers
@@ -147,7 +147,7 @@ namespace MVCProjectModelAuthentication.Controllers
             }
             else
             {
-                return RedirectToAction(nameof(HomeController.Index), "Home");
+                return RedirectToAction(nameof(UserController.Index), "Home");
             }
         }
 

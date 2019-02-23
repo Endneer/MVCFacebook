@@ -4,9 +4,15 @@
 }
 
 <h2>Profile</h2>
-
+@* Move Partials to another partial *@
 <div><partial name="_FriendRequests.cshtml" model="@ViewBag.UsersRequestingFriendship" /></div>
 <div><partial name="_Friends.cshtml" model="Model.Friends" /></div>
+
+<div> NewsFeed </div>
+<div> Bio </div>
+<div> Image </div>
+
+
 
 @if (!Model.Friends.Contains(ViewBag.LoggedInUser))
 {

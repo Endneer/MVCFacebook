@@ -71,11 +71,11 @@ namespace MVCFacebook
                 routes.MapRoute(
                     name: null,
                     template: "{action=home}",
-                    defaults: new { controller = "home" });
+                    defaults: new { controller = "User" });
 
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=User}/{action=Index}/{id?}");
             });
 
             DataSeed.SeedDatabase(context, um).Wait();

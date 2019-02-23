@@ -12,13 +12,13 @@ using MVCFacebook.Models;
 
 namespace MVCFacebook.Controllers
 {
-    public class HomeController : Controller
+    public class UserController : Controller
     {
 
         private ApplicationDbContext context;
         private SignInManager<ApplicationUser> signInManager;
 
-        public HomeController(ApplicationDbContext _context, SignInManager<ApplicationUser> _signInManager)
+        public UserController(ApplicationDbContext _context, SignInManager<ApplicationUser> _signInManager)
         {
             context = _context;
             signInManager = _signInManager;

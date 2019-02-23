@@ -51,7 +51,7 @@ namespace MVCFacebook
             , "GGHHgghh.123");
 
 
-            context.Users.FirstOrDefault(U => U.UserName == "Test1@Email.com").requestFriendship(context, context.Users.FirstOrDefault(U => U.UserName == "Test2@Email.com"));
+            //context.Users.FirstOrDefault(U => U.UserName == "Test1@Email.com").requestFriendship(context, context.Users.FirstOrDefault(U => U.UserName == "Test2@Email.com"));
 
 
             await context.SaveChangesAsync();

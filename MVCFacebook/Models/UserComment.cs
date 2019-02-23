@@ -18,6 +18,8 @@ namespace MVCFacebook.Models
         public int PostID { get; set; }    
 
 
+
+        public PostState State { get; set; }
         public ApplicationUser CommentingUser { get; set; }
         public Post CommentedPost { get; set; }
         public String CommentText { get; set; }

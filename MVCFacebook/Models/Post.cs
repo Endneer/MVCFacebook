@@ -11,6 +11,7 @@ namespace MVCFacebook.Models
         public String Text { get; set; }
         public DateTime CreationDate { get; set; }
         public ApplicationUser Creator { get; set; }
+        public PostState State { get; set; }
 
         [Key]
         public int ID { get; set; }

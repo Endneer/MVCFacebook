@@ -14,4 +14,9 @@ namespace MVCFacebook.Models
     {
         Active, Blocked
     }
+
+    public enum PostState
+    {
+        Active, Deleted
+    }
 }

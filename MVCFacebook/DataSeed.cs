@@ -36,6 +36,8 @@ namespace MVCFacebook
             }
             , "GGHHgghh.123");
 
+            
+
             await userManager.CreateAsync(new ApplicationUser()
             {
                 UserName = "Test4@Email.com",

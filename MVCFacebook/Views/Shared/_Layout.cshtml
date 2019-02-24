@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -28,15 +31,31 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">MVCFacebook</a>
+
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <form asp-controller="Account" asp-action="Logout" method="post" id="logoutForm" class="navbar-right">
+                        <ul class="nav navbar-nav navbar-right">
+                            <li>
+                                <button type="submit" class="btn btn-link navbar-btn navbar-link">Logout</button>
+                            </li>
+                            <li>
+                                <a asp-controller="User" asp-action="Profile">@UserManager.GetUserName(User)</a>
+                            </li>
+                            <li>
+                                <a asp-controller="User" asp-action="Settings">Settings</a>
+                            </li>
+                            <li>
+                                <a asp-controller="User" asp-action="Home">Home</a>
+                            </li>
+                        </ul>  
+                    </form>
+                }
+
+
             </div>
             <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
-                </ul>
-                <partial name="_LoginPartial" />
+                <ul class="nav navbar-nav"></ul>
             </div>
         </div>
     </nav>

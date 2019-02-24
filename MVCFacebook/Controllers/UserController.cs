@@ -12,55 +12,45 @@ using MVCFacebook.Models;
 
 namespace MVCFacebook.Controllers
 {
+    [Authorize]
     public class UserController : Controller
     {
-
         private ApplicationDbContext context;
         private SignInManager<ApplicationUser> signInManager;
-
+        
         public UserController(ApplicationDbContext _context, SignInManager<ApplicationUser> _signInManager)
         {
             context = _context;
             signInManager = _signInManager;
         }
 
-        [Authorize]
+        //
+        //public IActionResult Index_old()
+        //{
+        //    ApplicationUser loggedUser = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
+        //    loggedUser.loadFriendships(context);
+        //    var friends = loggedUser.Friends.Select(x => x.Id);
+        //    ViewBag.posts = (context.Posts.Where(x => x.Creator.Id == signInManager.UserManager.GetUserId(HttpContext.User) || friends.Contains(x.Creator.Id)).OrderByDescending(y => y.CreationDate));
+        //    return View();
+        //}
+
+        [AllowAnonymous]
         public IActionResult Index()
         {
-            ApplicationUser loggedUser = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
-            loggedUser.loadFriendships(context);
-            var friends = loggedUser.Friends.Select(x => x.Id);
-            ViewBag.posts = (context.Posts.Where(x => x.Creator.Id == signInManager.UserManager.GetUserId(HttpContext.User) || friends.Contains(x.Creator.Id)).OrderByDescending(y => y.CreationDate));
             return View();
         }
 
-        public IActionResult About()
-        {
-            ViewData["Message"] = "Your application description page.";
-
-            return View();
-        }
-
-        public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
-
-            return View();
-        }
-
-        public IActionResult Privacy()
+        public IActionResult Home()
         {
             return View();
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult Settings()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View();
         }
 
 
-        [Authorize]
         public IActionResult Profile(string userName)
         {
 
@@ -117,7 +107,6 @@ namespace MVCFacebook.Controllers
             return View(modelUser);
         }
 
-        [Authorize]
         public IActionResult addPost(Post po)
         {
             if (po.Text != null && po.Text.Length > 0)

@@ -72,7 +72,7 @@ namespace MVCFacebook
 
                 routes.MapRoute(
                     name: null,
-                    template: "{action=home}",
+                    template: "{action=Index}",
                     defaults: new { controller = "User" });
 
                 routes.MapRoute(

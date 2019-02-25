@@ -11,8 +11,10 @@ namespace MVCFacebook.Models
     // Add profile data for application users by adding properties to the ApplicationUser class
     public class ApplicationUser : IdentityUser
     {
+        public String FirstName { get; set; }
+        public String LastName { get; set; }
         public Gender Gender { get; set; }
-        public AccountState State { get; set; }
+        public AccountState State { get; set; } = AccountState.Active;
         public String Bio { get; set; }
         public DateTime BirthDate { get; set; }
 

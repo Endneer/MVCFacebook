@@ -18,6 +18,7 @@ namespace MVCFacebook.Models
         public String Bio { get; set; }
         public DateTime BirthDate { get; set; }
         public byte[] Image { get; set; }
+        public String ContentType { get; set; }
 
         public virtual ICollection<Friendship> FriendRequestsSent { get; set; }
         public virtual ICollection<Friendship> FriendRequestsRecieved { get; set; }

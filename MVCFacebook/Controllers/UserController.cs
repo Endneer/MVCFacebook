@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -64,56 +66,83 @@ namespace MVCFacebook.Controllers
             
             ///////
 
-            string modelUserID;
-            if (userName == null)
+            //string modelUserID;
+            //if (userName == null)
+            //{
+            //    //logged in user
+            //    modelUserID = signInManager.UserManager.GetUserId(User);
+            //}
+
+            //else
+            //{
+            //    //user profile with the entered id
+            //    modelUserID = context.Users.FirstOrDefault(u => u.UserName == userName).Id;
+            //}
+            //ApplicationUser modelUser = context.Users.FirstOrDefault(u => u.Id == modelUserID);
+
+
+            //if (userName == null) //Viewing my profile
+            //{
+            //    var UsersRequestingFriendship = modelUser.getPendingFriendRequests(context).Select(u => u.User1).ToList();
+            //    ViewBag.UsersRequestingFriendship = UsersRequestingFriendship;
+            //    ViewBag.LoggedInUser = modelUser;
+            //}
+            //else //Viewing someone else profile
+            //{
+            //    ViewBag.LoggedInUser = null;
+
+            //    ViewBag.UsersRequestingFriendship = new List<ApplicationUser>();
+            //}
+            //var friends = modelUser.Friends;
+
+
+            //#region add dummy friendship between logged in user and test5 to test friends partial veiw
+            //try
+            //{
+            //    modelUser.requestFriendship(context, context.Users.FirstOrDefault(i => i.UserName == "Test5@Email.com"));
+
+            //    context.Users.FirstOrDefault(i => i.UserName == "Test5@Email.com").confirmFriendship(context,
+            //        context.Users.FirstOrDefault(i => i.UserName == "Test5@Email.com").FriendRequestsRecieved.FirstOrDefault());
+
+
+
+            //    context.Users.FirstOrDefault(u => u.UserName == "Test4@Email.com").requestFriendship(context, modelUser);
+            //    context.Users.FirstOrDefault(u => u.UserName == "Test3@Email.com").requestFriendship(context, modelUser);
+            //}
+            //catch (Exception)
+            //{
+
+            //}
+            //#endregion
+
+            //return View(modelUser);
+        }
+
+        [HttpPost]
+        public IActionResult UploadImage(IList<IFormFile> files,String id)
+        {
+            IFormFile uploadedImage = files.FirstOrDefault();
+
+            if (uploadedImage.ContentType.ToLower().StartsWith("image/"))
             {
-                //logged in user
-                modelUserID = signInManager.UserManager.GetUserId(User);
+                MemoryStream ms = new MemoryStream();
+                uploadedImage.OpenReadStream().CopyTo(ms);
+
+                ApplicationUser user = context.Users.FirstOrDefault(U=> U.Id == id);
+                user.Image = ms.ToArray();
+                user.ContentType = uploadedImage.ContentType;
+                
+                context.SaveChanges();
             }
+            return RedirectToAction("Profile/" + signInManager.UserManager.GetUserName(User));
+        }
 
-            else
-            {
-                //user profile with the entered id
-                modelUserID = context.Users.FirstOrDefault(u => u.UserName == userName).Id;
-            }
-            ApplicationUser modelUser = context.Users.FirstOrDefault(u => u.Id == modelUserID);
-
-
-            if (userName == null) //Viewing my profile
-            {
-                var UsersRequestingFriendship = modelUser.getPendingFriendRequests(context).Select(u => u.User1).ToList();
-                ViewBag.UsersRequestingFriendship = UsersRequestingFriendship;
-                ViewBag.LoggedInUser = modelUser;
-            }
-            else //Viewing someone else profile
-            {
-                ViewBag.LoggedInUser = null;
-
-                ViewBag.UsersRequestingFriendship = new List<ApplicationUser>();
-            }
-            var friends = modelUser.Friends;
-
-
-            #region add dummy friendship between logged in user and test5 to test friends partial veiw
-            try
-            {
-                modelUser.requestFriendship(context, context.Users.FirstOrDefault(i => i.UserName == "Test5@Email.com"));
-
-                context.Users.FirstOrDefault(i => i.UserName == "Test5@Email.com").confirmFriendship(context,
-                    context.Users.FirstOrDefault(i => i.UserName == "Test5@Email.com").FriendRequestsRecieved.FirstOrDefault());
-
-
-
-                context.Users.FirstOrDefault(u => u.UserName == "Test4@Email.com").requestFriendship(context, modelUser);
-                context.Users.FirstOrDefault(u => u.UserName == "Test3@Email.com").requestFriendship(context, modelUser);
-            }
-            catch (Exception)
-            {
-
-            }
-            #endregion
-
-            return View(modelUser);
+        [HttpGet]
+        public FileStreamResult ViewImage(String id)
+        {
+            ApplicationUser user = context.Users.FirstOrDefault(U => U.Id == id);
+            MemoryStream ms = new MemoryStream(user.Image);
+            return new FileStreamResult(ms, user.ContentType);
         }
 
         public IActionResult addPost(Post po)

@@ -40,7 +40,7 @@
                                 <button type="submit" class="btn btn-link navbar-btn navbar-link">Logout</button>
                             </li>
                             <li>
-                                <a asp-controller="User" asp-action="Profile">@UserManager.GetUserName(User)</a>
+                                <a asp-controller="User" asp-action="Profile/@UserManager.GetUserName(User)">@UserManager.GetUserName(User)</a>
                             </li>
                             <li>
                                 <a asp-controller="User" asp-action="Settings">Settings</a>

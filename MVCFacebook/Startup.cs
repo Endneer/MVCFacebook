@@ -75,6 +75,13 @@ namespace MVCFacebook
                     template: "{action=Index}",
                     defaults: new { controller = "User" });
 
+
+                routes.MapRoute(
+                name: "null",
+                template: "Profile/{userName}",
+                defaults: new { action="Profile" , controller ="User" });
+
+
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=User}/{action=Index}/{id?}");

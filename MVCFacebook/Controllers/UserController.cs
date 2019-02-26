@@ -50,10 +50,19 @@ namespace MVCFacebook.Controllers
             return View();
         }
 
-
+        [Authorize]
         public IActionResult Profile(string userName)
         {
+            ApplicationUser user =  context.Users.FirstOrDefault(U=>U.UserName == userName);
 
+            if (user != null) {
+                user.loadFriendships(context);
+                return View(user);
+            }
+            else
+                return RedirectToAction(nameof(Index));
+            
+            ///////
 
             string modelUserID;
             if (userName == null)
@@ -119,6 +128,32 @@ namespace MVCFacebook.Controllers
             }
             return RedirectToAction("Index");
         }
+        [HttpPost]
+        public IActionResult SendFriendRequest(string Id)
+        {
+            var user = context.Users.FirstOrDefault(a => a.Id == Id);
+            var LoggedInUser = context.Users.FirstOrDefault(a => a.Id == signInManager.UserManager.GetUserId(User));
+
+            if (LoggedInUser.getPendingFriendRequests(context).Contains(LoggedInUser.FriendRequestsRecieved.FirstOrDefault(a => a.User1ID == user.Id)))
+            {
+                LoggedInUser.confirmFriendship(context, LoggedInUser.getPendingFriendRequests(context).FirstOrDefault(u => u.User1ID == user.Id));
+            }
+            else if (user.getPendingFriendRequests(context).Contains(LoggedInUser.FriendRequestsRecieved.FirstOrDefault(a => a.User2ID == LoggedInUser.Id)))
+            {
+                user.confirmFriendship(context, user.getPendingFriendRequests(context).FirstOrDefault(u => u.User2ID == LoggedInUser.Id));
+            }
+            else if (LoggedInUser.Friends.Contains(user))
+            {
+                LoggedInUser.Friends.Remove(user);
+            }
+            else
+            {
+                LoggedInUser.requestFriendship(context, user);
+            }
+
+            return RedirectToAction("Profile", new { userName = user.UserName });
+        }
+
         [HttpPost]
         public IActionResult AcceptFriendRequest(string id)
         {

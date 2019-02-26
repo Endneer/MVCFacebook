@@ -2,19 +2,51 @@
 @{
     ViewData["Title"] = "Profile";
 }
+@inject UserManager<ApplicationUser> Usermanager
+@inject SignInManager<ApplicationUser> Signinmanager
+@inject ApplicationDbContext context
 
 <h2>Profile</h2>
+
+<div>
+    <h1>@($"{Model.FirstName} {Model.LastName}")</h1>
+    <label>@Model.Gender.ToString()</label><br />
+    <p>@Model.Bio</p>
+    <p>@Model.BirthDate.ToShortDateString()</p><br />
+</div>
+
+<div>
+    @if (Model.Id != Usermanager.GetUserId(User))
+    {
+        @if (Model.FriendRequestsSent.Any(F => F.User2ID == Usermanager.GetUserId(User) && F.Pending))
+        {
+            <form method="post" asp-action="ConfirmFriendship">
+                <input type="submit" value="Accept Friend" />
+            </form>
+        }
+        else if (Model.FriendRequestsRecieved.Any(F => F.User1ID == Usermanager.GetUserId(User) && F.Pending))
+        {
+            <label> Friendship Pending </label>
+        }
+        else if (Model.Friends.Any(F => F.Id == Usermanager.GetUserId(User)))
+        {
+            <form method="post" asp-action="RemoveFriend">
+                <input type="submit" value="Remove Friend" />
+            </form>
+        }
+        else
+        {
+            <form method="post" asp-action="AddFriend">
+                <input type="submit" value="Add Friend" />
+            </form>
+        }
+    }
+</div>
+
+
 @* Move Partials to another partial *@
-<div><partial name="_FriendRequests.cshtml" model="@ViewBag.UsersRequestingFriendship" /></div>
-<div><partial name="_Friends.cshtml" model="Model.Friends" /></div>
+@*<div><partial name="_FriendRequests.cshtml" model="@ViewBag.UsersRequestingFriendship" /></div>
+    <div><partial name="_Friends.cshtml" model="Model.Friends" /></div>*@
 
 <div> NewsFeed </div>
-<div> Bio </div>
 <div> Image </div>
-
-
-
-@if (!Model.Friends.Contains(ViewBag.LoggedInUser))
-{
-    <div><input type="submit" value="AddFriend" style="visibility:visible"/></div>
-}

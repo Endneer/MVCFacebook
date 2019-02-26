@@ -17,6 +17,7 @@ namespace MVCFacebook.Models
         public AccountState State { get; set; } = AccountState.Active;
         public String Bio { get; set; }
         public DateTime BirthDate { get; set; }
+        public byte[] Image { get; set; }
 
         public virtual ICollection<Friendship> FriendRequestsSent { get; set; }
         public virtual ICollection<Friendship> FriendRequestsRecieved { get; set; }

@@ -64,58 +64,6 @@ namespace MVCFacebook.Controllers
             else
                 return RedirectToAction(nameof(Index));
             
-            ///////
-
-            //string modelUserID;
-            //if (userName == null)
-            //{
-            //    //logged in user
-            //    modelUserID = signInManager.UserManager.GetUserId(User);
-            //}
-
-            //else
-            //{
-            //    //user profile with the entered id
-            //    modelUserID = context.Users.FirstOrDefault(u => u.UserName == userName).Id;
-            //}
-            //ApplicationUser modelUser = context.Users.FirstOrDefault(u => u.Id == modelUserID);
-
-
-            //if (userName == null) //Viewing my profile
-            //{
-            //    var UsersRequestingFriendship = modelUser.getPendingFriendRequests(context).Select(u => u.User1).ToList();
-            //    ViewBag.UsersRequestingFriendship = UsersRequestingFriendship;
-            //    ViewBag.LoggedInUser = modelUser;
-            //}
-            //else //Viewing someone else profile
-            //{
-            //    ViewBag.LoggedInUser = null;
-
-            //    ViewBag.UsersRequestingFriendship = new List<ApplicationUser>();
-            //}
-            //var friends = modelUser.Friends;
-
-
-            //#region add dummy friendship between logged in user and test5 to test friends partial veiw
-            //try
-            //{
-            //    modelUser.requestFriendship(context, context.Users.FirstOrDefault(i => i.UserName == "Test5@Email.com"));
-
-            //    context.Users.FirstOrDefault(i => i.UserName == "Test5@Email.com").confirmFriendship(context,
-            //        context.Users.FirstOrDefault(i => i.UserName == "Test5@Email.com").FriendRequestsRecieved.FirstOrDefault());
-
-
-
-            //    context.Users.FirstOrDefault(u => u.UserName == "Test4@Email.com").requestFriendship(context, modelUser);
-            //    context.Users.FirstOrDefault(u => u.UserName == "Test3@Email.com").requestFriendship(context, modelUser);
-            //}
-            //catch (Exception)
-            //{
-
-            //}
-            //#endregion
-
-            //return View(modelUser);
         }
 
         [HttpPost]
@@ -158,33 +106,33 @@ namespace MVCFacebook.Controllers
             return RedirectToAction("Index");
         }
         [HttpPost]
-        public IActionResult SendFriendRequest(string Id)
+        public IActionResult SendFriendRequest(string Id )
         {
             var user = context.Users.FirstOrDefault(a => a.Id == Id);
             var LoggedInUser = context.Users.FirstOrDefault(a => a.Id == signInManager.UserManager.GetUserId(User));
 
-            if (LoggedInUser.getPendingFriendRequests(context).Contains(LoggedInUser.FriendRequestsRecieved.FirstOrDefault(a => a.User1ID == user.Id)))
-            {
-                LoggedInUser.confirmFriendship(context, LoggedInUser.getPendingFriendRequests(context).FirstOrDefault(u => u.User1ID == user.Id));
-            }
-            else if (user.getPendingFriendRequests(context).Contains(LoggedInUser.FriendRequestsRecieved.FirstOrDefault(a => a.User2ID == LoggedInUser.Id)))
-            {
-                user.confirmFriendship(context, user.getPendingFriendRequests(context).FirstOrDefault(u => u.User2ID == LoggedInUser.Id));
-            }
-            else if (LoggedInUser.Friends.Contains(user))
-            {
-                LoggedInUser.Friends.Remove(user);
-            }
-            else
-            {
-                LoggedInUser.requestFriendship(context, user);
-            }
+            LoggedInUser.requestFriendship(context, user);
 
-            return RedirectToAction("Profile", new { userName = user.UserName });
+            return RedirectToAction($"Profile/{user.UserName}");
         }
 
         [HttpPost]
-        public IActionResult AcceptFriendRequest(string id)
+        public IActionResult RemoveFriend(string Id)
+        {
+            ApplicationUser LoggedInUser = context.Users.FirstOrDefault(a => a.Id == signInManager.UserManager.GetUserId(User));
+
+            LoggedInUser.loadFriendships(context);
+
+            LoggedInUser.FriendRequestsRecieved.Remove(LoggedInUser.FriendRequestsRecieved.FirstOrDefault(F=>F.User1ID == Id));
+            LoggedInUser.FriendRequestsSent.Remove(LoggedInUser.FriendRequestsSent.FirstOrDefault(F=>F.User2ID == Id));
+
+            context.SaveChanges();
+
+            return RedirectToAction($"Profile/{context.Users.FirstOrDefault(U=>U.Id == Id).UserName}");
+        }
+
+        [HttpPost]
+        public IActionResult AcceptFriendRequest(string id,string returnUrl)
         {
 
             string loggedInUserID = signInManager.UserManager.GetUserId(User);
@@ -195,22 +143,9 @@ namespace MVCFacebook.Controllers
             loggedInUser.confirmFriendship(context,
                 loggedInUser.FriendRequestsRecieved.FirstOrDefault(u => u.User1ID == id));
 
-            return RedirectToAction("Profile");
+            return RedirectToAction(returnUrl);
         }
 
-        public IActionResult RejectFriendRequest(string id)
-        {
-
-            string loggedInUserID = signInManager.UserManager.GetUserId(User);
-            var loggedInUser = context.Users.FirstOrDefault(u => u.Id == loggedInUserID);
-
-            loggedInUser.loadFriendships(context);
-
-            loggedInUser.denyFriendship(context,
-                loggedInUser.FriendRequestsRecieved.FirstOrDefault(u => u.User1ID == id));
-
-            return RedirectToAction("Profile");
-        }
 
     }
 }

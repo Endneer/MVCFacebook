@@ -69,18 +69,15 @@ namespace MVCFacebook
 
             app.UseMvc(routes =>
             {
-
                 routes.MapRoute(
-                    name: null,
-                    template: "{action=Index}",
-                    defaults: new { controller = "User" });
-
-
-                routes.MapRoute(
-                name: "null",
+                name: null,
                 template: "Profile/{userName}",
                 defaults: new { action="Profile" , controller ="User" });
 
+                routes.MapRoute(
+                 name: null,
+                 template: "Settings",
+                 defaults: new { action = "Settings", controller = "User" });
 
                 routes.MapRoute(
                     name: "default",

@@ -14,6 +14,9 @@ else
 {
     <img src="~/images/QM.jpg" />
 }
+
+
+
 @if (Model.Id == Usermanager.GetUserId(User))
 {
     <form asp-action="UploadImage" asp-route-id="@Model.Id" enctype="multipart/form-data" method="post">
@@ -34,7 +37,7 @@ else
     {
         @if (Model.FriendRequestsSent.Any(F => F.User2ID == Usermanager.GetUserId(User) && F.Pending))
         {
-            <form method="post" asp-action="ConfirmFriendship">
+            <form method="post" asp-route-id="@Model.Id" asp-route-returnUrl="@($"{Url.Action()}/{Model.UserName}")" asp-action="AcceptFriendRequest">
                 <input type="submit" value="Accept Friend" />
             </form>
         }
@@ -44,13 +47,13 @@ else
         }
         else if (Model.Friends.Any(F => F.Id == Usermanager.GetUserId(User)))
         {
-            <form method="post" asp-action="RemoveFriend">
+            <form method="post" asp-action="RemoveFriend" asp-route-id="@Model.Id">
                 <input type="submit" value="Remove Friend" />
             </form>
         }
         else
         {
-            <form method="post" asp-action="AddFriend">
+            <form method="post" asp-route-id="@Model.Id" asp-action="SendFriendRequest">
                 <input type="submit" value="Add Friend" />
             </form>
         }

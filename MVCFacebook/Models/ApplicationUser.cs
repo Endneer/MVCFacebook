@@ -17,6 +17,8 @@ namespace MVCFacebook.Models
         public AccountState State { get; set; } = AccountState.Active;
         public String Bio { get; set; }
         public DateTime BirthDate { get; set; }
+        public byte[] Image { get; set; }
+        public String ContentType { get; set; }
 
         public virtual ICollection<Friendship> FriendRequestsSent { get; set; }
         public virtual ICollection<Friendship> FriendRequestsRecieved { get; set; }
@@ -28,6 +30,7 @@ namespace MVCFacebook.Models
         {
             Comments = new HashSet<UserComment>();
             Likes = new HashSet<UserLike>();
+            Posts = new HashSet<Post>();
             FriendRequestsSent = new HashSet<Friendship>();
             FriendRequestsRecieved = new HashSet<Friendship>();
         }
@@ -36,10 +39,10 @@ namespace MVCFacebook.Models
         public ICollection<ApplicationUser> Friends
         {
             get =>
-FriendRequestsSent.Where(F => !F.Pending).Select(F => F.User2)
-.Union(FriendRequestsRecieved.Where(F => !F.Pending).Select(F => F.User1))
-.ToList();
-        }
+            FriendRequestsSent.Where(F => !F.Pending).Select(F => F.User2)
+            .Union(FriendRequestsRecieved.Where(F => !F.Pending).Select(F => F.User1))
+            .ToList();
+                }
 
         public void loadFriendships(Data.ApplicationDbContext context)
         {

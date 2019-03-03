@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -56,61 +58,45 @@ namespace MVCFacebook.Controllers
             return View();
         }
 
-
+        [Authorize]
         public IActionResult Profile(string userName)
         {
+            ApplicationUser user =  context.Users.FirstOrDefault(U=>U.UserName == userName);
 
-
-            string modelUserID;
-            if (userName == null)
-            {
-                //logged in user
-                modelUserID = signInManager.UserManager.GetUserId(User);
+            if (user != null) {
+                user.loadFriendships(context);
+                return View(user);
             }
-
             else
+                return RedirectToAction(nameof(Index));
+            
+        }
+
+        [HttpPost]
+        public IActionResult UploadImage(IList<IFormFile> files,String id)
+        {
+            IFormFile uploadedImage = files.FirstOrDefault();
+
+            if (uploadedImage.ContentType.ToLower().StartsWith("image/"))
             {
-                //user profile with the entered id
-                modelUserID = context.Users.FirstOrDefault(u => u.UserName == userName).Id;
+                MemoryStream ms = new MemoryStream();
+                uploadedImage.OpenReadStream().CopyTo(ms);
+
+                ApplicationUser user = context.Users.FirstOrDefault(U=> U.Id == id);
+                user.Image = ms.ToArray();
+                user.ContentType = uploadedImage.ContentType;
+                
+                context.SaveChanges();
             }
-            ApplicationUser modelUser = context.Users.FirstOrDefault(u => u.Id == modelUserID);
+            return RedirectToAction("Profile/" + signInManager.UserManager.GetUserName(User));
+        }
 
-
-            if (userName == null) //Viewing my profile
-            {
-                var UsersRequestingFriendship = modelUser.getPendingFriendRequests(context).Select(u => u.User1).ToList();
-                ViewBag.UsersRequestingFriendship = UsersRequestingFriendship;
-                ViewBag.LoggedInUser = modelUser;
-            }
-            else //Viewing someone else profile
-            {
-                ViewBag.LoggedInUser = null;
-
-                ViewBag.UsersRequestingFriendship = new List<ApplicationUser>();
-            }
-            var friends = modelUser.Friends;
-
-
-            #region add dummy friendship between logged in user and test5 to test friends partial veiw
-            try
-            {
-                modelUser.requestFriendship(context, context.Users.FirstOrDefault(i => i.UserName == "Test5@Email.com"));
-
-                context.Users.FirstOrDefault(i => i.UserName == "Test5@Email.com").confirmFriendship(context,
-                    context.Users.FirstOrDefault(i => i.UserName == "Test5@Email.com").FriendRequestsRecieved.FirstOrDefault());
-
-
-
-                context.Users.FirstOrDefault(u => u.UserName == "Test4@Email.com").requestFriendship(context, modelUser);
-                context.Users.FirstOrDefault(u => u.UserName == "Test3@Email.com").requestFriendship(context, modelUser);
-            }
-            catch (Exception)
-            {
-
-            }
-            #endregion
-
-            return View(modelUser);
+        [HttpGet]
+        public FileStreamResult ViewImage(String id)
+        {
+            ApplicationUser user = context.Users.FirstOrDefault(U => U.Id == id);
+            MemoryStream ms = new MemoryStream(user.Image);
+            return new FileStreamResult(ms, user.ContentType);
         }
         [Authorize]
         public IActionResult addPost(Post po)
@@ -134,7 +120,33 @@ namespace MVCFacebook.Controllers
             return RedirectToAction("Home");
         }
         [HttpPost]
-        public IActionResult AcceptFriendRequest(string id)
+        public IActionResult SendFriendRequest(string Id )
+        {
+            var user = context.Users.FirstOrDefault(a => a.Id == Id);
+            var LoggedInUser = context.Users.FirstOrDefault(a => a.Id == signInManager.UserManager.GetUserId(User));
+
+            LoggedInUser.requestFriendship(context, user);
+
+            return RedirectToAction($"Profile/{user.UserName}");
+        }
+
+        [HttpPost]
+        public IActionResult RemoveFriend(string Id)
+        {
+            ApplicationUser LoggedInUser = context.Users.FirstOrDefault(a => a.Id == signInManager.UserManager.GetUserId(User));
+
+            LoggedInUser.loadFriendships(context);
+
+            LoggedInUser.FriendRequestsRecieved.Remove(LoggedInUser.FriendRequestsRecieved.FirstOrDefault(F=>F.User1ID == Id));
+            LoggedInUser.FriendRequestsSent.Remove(LoggedInUser.FriendRequestsSent.FirstOrDefault(F=>F.User2ID == Id));
+
+            context.SaveChanges();
+
+            return RedirectToAction($"Profile/{context.Users.FirstOrDefault(U=>U.Id == Id).UserName}");
+        }
+
+        [HttpPost]
+        public IActionResult AcceptFriendRequest(string id,string returnUrl)
         {
 
             string loggedInUserID = signInManager.UserManager.GetUserId(User);
@@ -145,22 +157,9 @@ namespace MVCFacebook.Controllers
             loggedInUser.confirmFriendship(context,
                 loggedInUser.FriendRequestsRecieved.FirstOrDefault(u => u.User1ID == id));
 
-            return RedirectToAction("Profile");
+            return RedirectToAction(returnUrl);
         }
 
-        public IActionResult RejectFriendRequest(string id)
-        {
-
-            string loggedInUserID = signInManager.UserManager.GetUserId(User);
-            var loggedInUser = context.Users.FirstOrDefault(u => u.Id == loggedInUserID);
-
-            loggedInUser.loadFriendships(context);
-
-            loggedInUser.denyFriendship(context,
-                loggedInUser.FriendRequestsRecieved.FirstOrDefault(u => u.User1ID == id));
-
-            return RedirectToAction("Profile");
-        }
 
     }
 }

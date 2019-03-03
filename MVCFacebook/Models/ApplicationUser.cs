@@ -121,7 +121,7 @@ FriendRequestsSent.Where(F => !F.Pending).Select(F => F.User2)
             return false;
         }
 
-        public bool commentOnPost(Post p, Data.ApplicationDbContext context, String commentText)
+        public bool commentOnPost(Post p, String commentText, Data.ApplicationDbContext context)
         {
 
             ;

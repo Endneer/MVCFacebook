@@ -1,0 +1,13 @@
+﻿<label>@ViewBag.post.Text</label>
+    <table>
+        @foreach (var item in ViewBag.post.Comments)
+        {ViewBag.comment = item;
+            <tr>
+                <td>
+                   <partial  name="_comment" />
+                </td>
+            </tr>
+
+        }
+    </table>
+<partial name="_addComment" />

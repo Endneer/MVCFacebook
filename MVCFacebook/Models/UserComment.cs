@@ -11,7 +11,6 @@ namespace MVCFacebook.Models
     {
         [Key]
         public int ID { get; set; }
-
         [ForeignKey("ApplicationUser")]
         public String UserID { get; set; }
         [ForeignKey("Post")]

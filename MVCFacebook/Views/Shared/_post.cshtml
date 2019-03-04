@@ -1,13 +1,24 @@
-﻿<label>@ViewBag.post.Text</label>
-    <table>
-        @foreach (var item in ViewBag.post.Comments)
-        {ViewBag.comment = item;
+﻿<span>@ViewBag.post.Text</span>
+<form method="post">
+    <input type="submit" value="x" asp-action="DeletePost" class="btn btn-danger" asp-route-post=@ViewBag.post.ID>
+</form>
+<form method="post">
+    <input type="submit" value="toggle like" asp-action="toggleLike" class="btn btn-info" asp-route-post=@ViewBag.post.ID>
+</form>
+<table>
+    @foreach (var item in ViewBag.post.Comments)
+    {
+        if (item.State == PostState.Active)
+        {
+            ViewBag.comment = item;
             <tr>
                 <td>
-                   <partial  name="_comment" />
+                    <partial name="_comment" />
                 </td>
             </tr>
-
         }
-    </table>
+
+
+    }
+</table>
 <partial name="_addComment" />

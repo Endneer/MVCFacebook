@@ -58,15 +58,16 @@ namespace MVCFacebook.Controllers
             ApplicationUser loggedUser = context.Users.FirstOrDefault(x => x.Id == UM.GetUserId(HttpContext.User));
             loggedUser.loadFriendships(context);
             var friends = loggedUser.Friends.Select(x => x.Id);
-            ViewBag.posts = (context.Posts.Include(p=>p.Comments).Where(x => x.Creator.Id == UM.GetUserId(HttpContext.User) || friends.Contains(x.Creator.Id)).OrderByDescending(y => y.CreationDate));
+            ViewBag.posts = (context.Posts.Include(p => p.Comments)
+                .Where(x => (x.Creator.Id ==
+                        UM.GetUserId(HttpContext.User)
+                        || friends.Contains(x.Creator.Id))
+                                && x.State == PostState.Active
+                        ).OrderByDescending(y => y.CreationDate));
             
             return View();
         }
-
-        public IActionResult Settings()
-        {
-            return View();
-        }
+      
 
         [Authorize]
         public IActionResult Profile(string userName)
@@ -108,26 +109,58 @@ namespace MVCFacebook.Controllers
             MemoryStream ms = new MemoryStream(user.Image);
             return new FileStreamResult(ms, user.ContentType);
         }
-        [Authorize]
-        public IActionResult addPost(Post po)
+        
+        [HttpPost]
+        public IActionResult addPost(string post)
         {
-            if (po.Text != null && po.Text.Length > 0)
+            if (post != null && post.Length > 0)
             {
-                po.CreationDate = DateTime.Now;
-                po.Creator = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
-                context.Posts.Add(po);
-                context.SaveChanges();
-
+                var Creator = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
+                Creator.createPost(post,context);
             }
+            return RedirectToAction("Home");//ajax
+        }
+        
+        [HttpPost]
+        public IActionResult DeletePost(int post)
+        {            
+            var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
+            var myPost = context.Posts.FirstOrDefault(p => p.ID==post);
+            usr.deletePost(myPost, context);
             return RedirectToAction("Home");
         }
-        [Authorize]
-        public IActionResult addComment(UserComment comment)
+        
+        [HttpPost]
+        public IActionResult addComment(string commentText,int postId)
         {
             var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
-            var post = context.Posts.FirstOrDefault(p => p.ID == comment.PostID);
-            usr.commentOnPost(post, comment.CommentText,context);
+            var post = context.Posts.FirstOrDefault(p => p.ID == postId);
+            usr.commentOnPost(post,commentText,context);
             return RedirectToAction("Home");
+        }
+        [HttpPost]
+        public IActionResult DeleteComment(int commentId,int postId)
+        {
+            
+            var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
+            //  context.Entry(usr).Collection(u => u.Comments).Load();
+            var post = context.Posts.FirstOrDefault(p => p.ID == postId);
+            context.Entry(post).Collection(u => u.Comments).Load();
+            var myComment = post.Comments.FirstOrDefault(p => p.ID == commentId);
+            usr.deleteComment(myComment, context);
+            return RedirectToAction("home");
+        }
+        [HttpPost]
+        public IActionResult toggleLike(int post)
+        {
+            var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
+            var myPost = context.Posts.FirstOrDefault(p => p.ID == post);
+            usr.toggleLike(myPost, context);
+            return RedirectToAction("home");
+        }
+        public IActionResult Settings()
+        {
+            return View();
         }
         [HttpPost]
         public IActionResult SendFriendRequest(string Id )

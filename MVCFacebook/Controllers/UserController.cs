@@ -112,6 +112,15 @@ namespace MVCFacebook.Controllers
             return RedirectToAction("Home");
         }
         [Authorize]
+        public IActionResult DeletePost(int post)
+        {
+            
+            var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
+            var myPost = context.Posts.FirstOrDefault(p => p.ID==post);
+            usr.deletePost(myPost, context);
+            return RedirectToAction("Home");
+        }
+        [Authorize]
         public IActionResult addComment(UserComment comment)
         {
             var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));

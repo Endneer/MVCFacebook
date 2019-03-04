@@ -1,4 +1,5 @@
-﻿<label>@ViewBag.post.Text</label>
+﻿<span>@ViewBag.post.Text</span>
+<a asp-action="DeletePost" class="btn danger" asp-route-post=@ViewBag.post.ID>x</a>
     <table>
         @foreach (var item in ViewBag.post.Comments)
         {ViewBag.comment = item;

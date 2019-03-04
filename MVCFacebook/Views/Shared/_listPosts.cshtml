@@ -1,9 +1,10 @@
 ﻿<table>
     @foreach(var item in ViewBag.posts)
     {
+        ViewBag.post = item;
         <tr>
             <td>
-                <label>@item.Text</label>
+                <partial name="_post" />
             </td>
         </tr>
     }

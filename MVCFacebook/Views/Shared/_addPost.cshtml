@@ -1,0 +1,7 @@
+﻿@model Post
+<div>
+    <form method="post">
+        <textarea placeholder="what's in your mind!!" asp-for="Text"></textarea>
+        <input type="submit" value="Post" asp-action="addPost" asp-controller="User" />
+    </form>
+</div>

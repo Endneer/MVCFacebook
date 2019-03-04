@@ -124,7 +124,7 @@ namespace MVCFacebook.Models
             return false;
         }
 
-        public bool commentOnPost(Post p, Data.ApplicationDbContext context, String commentText)
+        public bool commentOnPost(Post p, String commentText, Data.ApplicationDbContext context)
         {
 
             ;

@@ -19,10 +19,11 @@ namespace MVCFacebook.Controllers
     {
         private ApplicationDbContext context;
         private SignInManager<ApplicationUser> signInManager;
-        
-        public UserController(ApplicationDbContext _context, SignInManager<ApplicationUser> _signInManager)
+        UserManager<ApplicationUser> UM;
+        public UserController(ApplicationDbContext _context, SignInManager<ApplicationUser> _signInManager, UserManager<ApplicationUser> um)
         {
             context = _context;
+            UM = um;
             signInManager = _signInManager;
         }
 
@@ -54,6 +55,11 @@ namespace MVCFacebook.Controllers
 
         public IActionResult Home()
         {
+            ApplicationUser loggedUser = context.Users.FirstOrDefault(x => x.Id == UM.GetUserId(HttpContext.User));
+            loggedUser.loadFriendships(context);
+            var friends = loggedUser.Friends.Select(x => x.Id);
+            ViewBag.posts = (context.Posts.Include(p=>p.Comments).Where(x => x.Creator.Id == UM.GetUserId(HttpContext.User) || friends.Contains(x.Creator.Id)).OrderByDescending(y => y.CreationDate));
+            
             return View();
         }
 
@@ -102,7 +108,7 @@ namespace MVCFacebook.Controllers
             MemoryStream ms = new MemoryStream(user.Image);
             return new FileStreamResult(ms, user.ContentType);
         }
-
+        [Authorize]
         public IActionResult addPost(Post po)
         {
             if (po.Text != null && po.Text.Length > 0)
@@ -113,7 +119,15 @@ namespace MVCFacebook.Controllers
                 context.SaveChanges();
 
             }
-            return RedirectToAction("Index");
+            return RedirectToAction("Home");
+        }
+        [Authorize]
+        public IActionResult addComment(UserComment comment)
+        {
+            var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
+            var post = context.Posts.FirstOrDefault(p => p.ID == comment.PostID);
+            usr.commentOnPost(post, comment.CommentText,context);
+            return RedirectToAction("Home");
         }
         [HttpPost]
         public IActionResult SendFriendRequest(string Id )

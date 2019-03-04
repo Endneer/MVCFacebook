@@ -1,0 +1,7 @@
+﻿@model UserComment
+<div>
+    <form method="post">
+        <textarea placeholder="write here!" asp-for="CommentText"></textarea>
+        <input type="submit" value="Comment" asp-action="addComment" asp-controller="User" asp-route-postID=@ViewBag.post.ID />
+    </form>
+</div>

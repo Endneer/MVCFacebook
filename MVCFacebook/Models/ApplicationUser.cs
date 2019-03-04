@@ -42,7 +42,7 @@ namespace MVCFacebook.Models
             FriendRequestsSent.Where(F => !F.Pending).Select(F => F.User2)
             .Union(FriendRequestsRecieved.Where(F => !F.Pending).Select(F => F.User1))
             .ToList();
-                }
+        }
 
         public void loadFriendships(Data.ApplicationDbContext context)
         {
@@ -97,7 +97,7 @@ namespace MVCFacebook.Models
 
         public void createPost(String postText, Data.ApplicationDbContext context)
         {
-            context.Entry(this).Collection(u => u.Posts).Load();
+
             Posts.Add(new Post()
             {
                 Text = postText,
@@ -112,12 +112,7 @@ namespace MVCFacebook.Models
             context.Entry(this).Collection(u => u.Posts).Load();
             if (Posts.Any(P => P.ID == tobeDeleted.ID))
             {
-                context.Entry(tobeDeleted).Collection(p => p.Likes).Load();
-                context.Entry(tobeDeleted).Collection(p => p.Comments).Load();
-                tobeDeleted.Likes.Clear();
-                tobeDeleted.Comments.Clear();
-                Posts.Remove(tobeDeleted);
-                context.Posts.Remove(tobeDeleted);
+                tobeDeleted.State = PostState.Deleted;
                 context.SaveChanges();
                 return true;
             }
@@ -146,11 +141,12 @@ namespace MVCFacebook.Models
 
         public bool deleteComment(UserComment comment, Data.ApplicationDbContext context)
         {
-            context.Entry(comment).Reference(c => c.CommentingUser).Load();
-            if (comment.CommentingUser.Id == Id)
+            context.Entry(comment).Reference(c => c.CommentedPost).Load();
+            var post = comment.CommentedPost;
+            context.Entry(post).Reference(c => c.Creator).Load();
+            if (comment.UserID == Id ||post.Creator.Id==Id)
             {
-                context.Entry(comment).Reference(c => c.CommentedPost).Load();
-                comment.CommentedPost.Comments.Remove(comment);
+                comment.State = PostState.Deleted;
                 context.SaveChanges();
                 return true;
             }

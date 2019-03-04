@@ -1,2 +1,5 @@
 ﻿
 <label> @ViewBag.comment.CommentText </label>
+<form method="post">
+    <input type="submit" value="x" asp-action="DeleteComment" class="btn btn-danger" asp-route-commentId=@ViewBag.comment.ID asp-route-postId=@ViewBag.comment.PostID >
+</form>

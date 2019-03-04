@@ -9,6 +9,10 @@ namespace MVCFacebook.Models.AccountViewModels
     public class RegisterViewModel
     {
         [Required]
+        [Display(Name = "Admin")]
+        public bool Admin { get; set; } = false;
+
+        [Required]
         [Display(Name = "First Name")]
         public string FstName { get; set; }
 

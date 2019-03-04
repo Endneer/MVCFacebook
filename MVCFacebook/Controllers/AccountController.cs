@@ -122,7 +122,13 @@ namespace MVCProjectModelAuthentication.Controllers
 
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     _logger.LogInformation("User created a new account with password.");
-                    return RedirectToLocal(returnUrl);
+                    if (returnUrl == null)
+                    {
+
+                        return RedirectToAction("Index", "User");
+                    }
+                    else
+                        return RedirectToLocal(returnUrl);
                 }
                 AddErrors(result);
             }

@@ -1,6 +1,6 @@
 ﻿@inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
-
+@inject ApplicationDbContext Context
 <!DOCTYPE html>
 <html>
 <head>
@@ -40,7 +40,7 @@
                                 <button type="submit" class="btn btn-link navbar-btn navbar-link">Logout</button>
                             </li>
                             <li>
-                                <a asp-controller="User" asp-action="Profile/@UserManager.GetUserName(User)">@UserManager.GetUserName(User)</a>
+                                <a href="/Profile/@UserManager.GetUserName(User)">@UserManager.GetUserName(User)</a>
                             </li>
                             <li>
                                 <a asp-controller="User" asp-action="Settings">Settings</a>
@@ -48,6 +48,12 @@
                             <li>
                                 <a asp-controller="User" asp-action="Home">Home</a>
                             </li>
+                            @if (UserManager.IsInRoleAsync(Context.Users.FirstOrDefault(U => U.Id == UserManager.GetUserId(User)), "Admin").Result)
+                            {
+                                <li>
+                                    <a asp-controller="Admin" asp-action="Index">Admin</a>
+                                </li>
+                            }
                         </ul>  
                     </form>
                 }

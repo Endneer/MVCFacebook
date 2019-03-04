@@ -23,6 +23,7 @@ namespace MVCProjectModelAuthentication.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+
         //private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
 
@@ -66,6 +67,11 @@ namespace MVCProjectModelAuthentication.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
+                    if (returnUrl == null) {
+
+                        return RedirectToAction("Index","User");
+                    }
+                    else 
                     return RedirectToLocal(returnUrl);
                 }               
                 else
@@ -111,6 +117,8 @@ namespace MVCProjectModelAuthentication.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    await _userManager.AddToRoleAsync(user,"Member");
 
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     _logger.LogInformation("User created a new account with password.");

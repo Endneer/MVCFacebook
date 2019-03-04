@@ -39,6 +39,16 @@ namespace MVCFacebook.Controllers
         [AllowAnonymous]
         public IActionResult Index()
         {
+            if (signInManager.IsSignedIn(User))
+            {
+                ApplicationUser loggedinUser = context.Users.FirstOrDefault( U => U.Id == signInManager.UserManager.GetUserId(User));
+                if (signInManager.UserManager.IsInRoleAsync(loggedinUser , "Admin").Result)
+                {
+                    return RedirectToAction("Index" , "Admin");       
+                }
+                return RedirectToAction("Home");
+            }
+
             return View();
         }
 

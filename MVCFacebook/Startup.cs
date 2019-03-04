@@ -48,7 +48,8 @@ namespace MVCFacebook
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env
-            , UserManager<ApplicationUser> um, ApplicationDbContext context)
+            , UserManager<ApplicationUser> um, ApplicationDbContext context,
+            RoleManager<IdentityRole> Rolemanager)
         {
             if (env.IsDevelopment())
             {
@@ -69,22 +70,36 @@ namespace MVCFacebook
 
             app.UseMvc(routes =>
             {
-                routes.MapRoute(
-                name: null,
-                template: "Profile/{userName}",
-                defaults: new { action="Profile" , controller ="User" });
 
                 routes.MapRoute(
-                 name: null,
-                 template: "Settings",
-                 defaults: new { action = "Settings", controller = "User" });
+                    name: null,
+                    template: "Profile/{userName}",
+                    defaults: new { action="Profile" , controller ="User" });
+
+                    routes.MapRoute(
+                     name: null,
+                     template: "Settings",
+                     defaults: new { action = "Settings", controller = "User" });
 
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=User}/{action=Index}/{id?}");
+                    template: "{controller=User}/{action=Index}/");
             });
 
-            DataSeed.SeedDatabase(context, um).Wait();
+            //Role initialization
+            if (!(Rolemanager.RoleExistsAsync("Member")).Result)
+                Rolemanager.CreateAsync(new IdentityRole()
+                {
+                    Name = "Member"
+                });
+
+            if (!(Rolemanager.RoleExistsAsync("Admin")).Result)
+                Rolemanager.CreateAsync(new IdentityRole()
+                {
+                    Name = "Admin"
+                });
+
+            //DataSeed.SeedDatabase(context, um).Wait();
         }
     }
 }

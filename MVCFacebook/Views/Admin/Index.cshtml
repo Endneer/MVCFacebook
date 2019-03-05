@@ -1,11 +1,40 @@
-﻿
+﻿@model List<ApplicationUser>
 @{
     ViewData["Title"] = "Index";
 }
 
+
 <h2>Admin Index</h2>
+
+<a asp-action="CreateUser">Create User</a>
+
+<div>
+    <div>
+        <form method="get">
+            <input type="text" name="value" /><button asp-action="Index">Search</button>
+        </form>
+    </div>
+    <div>
+        <form method="post" asp-controller="Admin">
+            @foreach (var item in Model)
+            {
+                <a asp-action="Profile" asp-controller="User" asp-route-username="@item.UserName">@item.UserName</a>
+                @if (item.State == AccountState.Blocked)
+                {
+                    <button asp-route-id="@item.Id" asp-action="Unblock">Unblock</button>
+                }
+                else
+                {
+                    <button asp-route-id="@item.Id" asp-action="Block">Block</button>
+                }
+
+                <br />
+            }
+        </form>
+    </div>
+</div>
 
 <div> User Search </div>
 <div> User CRUD </div>
 
-<a asp-action="CreateUser">Create User</a>
+

@@ -14,6 +14,7 @@ namespace MVCFacebook.Controllers
 {
     public class AdminController : Controller
     {
+        private ApplicationDbContext context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
@@ -21,20 +22,29 @@ namespace MVCFacebook.Controllers
         private readonly ILogger _logger;
 
         public AdminController(
+            ApplicationDbContext _context,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             //IEmailSender emailSender,
             ILogger<AdminController> logger)
         {
+            context = _context;
             _userManager = userManager;
             _signInManager = signInManager;
             //_emailSender = emailSender;
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string value)
         {
-            return View();
+            if (value == null)
+            {
+                return View(context.Users.ToList());
+            }
+            else
+            {
+                return View(context.Users.Where(u => string.Concat(u.UserName, u.FirstName, u.LastName).Contains(value)).ToList());
+            }
         }
 
         [HttpGet]
@@ -43,6 +53,24 @@ namespace MVCFacebook.Controllers
         {
             ViewData["ReturnUrl"] = returnUrl;
             return View();
+        }
+        [HttpPost]
+        public IActionResult Block(string id)
+        {
+            ApplicationUser user = context.Users.FirstOrDefault(U => U.Id == id);
+            user.State = AccountState.Blocked;
+            context.SaveChanges();
+
+            return RedirectToAction("Index");
+        }
+        [HttpPost]
+        public IActionResult Unblock(string id)
+        {
+            ApplicationUser user = context.Users.FirstOrDefault(U => U.Id == id);
+            user.State = AccountState.Active;
+            context.SaveChanges();
+
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -69,10 +97,10 @@ namespace MVCFacebook.Controllers
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    if(model.Admin == false)
-                    await _userManager.AddToRoleAsync(user, "Member");
+                    if (model.Admin == false)
+                        await _userManager.AddToRoleAsync(user, "Member");
                     else
-                    await _userManager.AddToRoleAsync(user, "Admin");
+                        await _userManager.AddToRoleAsync(user, "Admin");
 
 
                     await _signInManager.SignInAsync(user, isPersistent: false);
@@ -90,5 +118,7 @@ namespace MVCFacebook.Controllers
             // If we got this far, something failed, redisplay form
             return View(model);
         }
+
+
     }
 }

@@ -39,8 +39,8 @@ namespace MVCFacebook.Models
         public ICollection<ApplicationUser> Friends
         {
             get =>
-            FriendRequestsSent.Where(F => !F.Pending).Select(F => F.User2)
-            .Union(FriendRequestsRecieved.Where(F => !F.Pending).Select(F => F.User1))
+            FriendRequestsSent.Where(F => !F.Pending && F.User2 != null).Select(F => F.User2)
+            .Union(FriendRequestsRecieved.Where(F => !F.Pending && F.User1 != null).Select(F => F.User1))
             .ToList();
         }
 
@@ -49,12 +49,14 @@ namespace MVCFacebook.Models
             context.Entry(this).Collection(u => u.FriendRequestsRecieved).Load();
             foreach (var F in FriendRequestsRecieved)
             {
-                context.Entry(F).Reference(f => f.User1).Load();
+                if (!(context.Entry(F).State == Microsoft.EntityFrameworkCore.EntityState.Detached))
+                    context.Entry(F).Reference(f => f.User1).Load();
             }
             context.Entry(this).Collection(u => u.FriendRequestsSent).Load();
             foreach (var F in FriendRequestsSent)
             {
-                context.Entry(F).Reference(f => f.User2).Load();
+                if (!(context.Entry(F).State == Microsoft.EntityFrameworkCore.EntityState.Detached))
+                    context.Entry(F).Reference(f => f.User2).Load();
             }
         }
 

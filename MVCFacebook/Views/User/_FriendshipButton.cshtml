@@ -1,0 +1,46 @@
+﻿@model MVCFacebook.Models.ApplicationUser
+
+@inject UserManager<ApplicationUser> Usermanager
+@inject ApplicationDbContext context
+
+<div id="FriendshipInteraction">
+    @if (Model.Id != Usermanager.GetUserId(User))
+    {
+        @if (Model.FriendRequestsSent.Any(F => F.User2ID == Usermanager.GetUserId(User) && F.Pending))
+        {
+            <form method="post" asp-route-id="@Model.Id" asp-route-returnUrl="@($"{Url.Action()}/{Model.UserName}")" asp-action="AcceptFriendRequest"
+                      data-ajax="true"
+                      data-ajax-method="POST"
+                      data-ajax-mode="replace"
+                      data-ajax-update="#FriendshipInteraction"
+                >
+                <input type="submit" value="Accept Friend" />
+            </form>
+        }
+        else if (Model.FriendRequestsRecieved.Any(F => F.User1ID == Usermanager.GetUserId(User) && F.Pending))
+        {
+            <label> Friendship Pending </label>
+        }
+        else if (Model.Friends.Any(F => F.Id == Usermanager.GetUserId(User)))
+        {
+            <form method="post" asp-action="RemoveFriend" asp-route-id="@Model.Id"
+                      data-ajax="true"
+                      data-ajax-method="POST"
+                      data-ajax-mode="replace"
+                      data-ajax-update="#FriendshipInteraction"
+                      >
+                <input type="submit" value="Remove Friend" />
+            </form>
+        }
+        else
+        {
+            <form method="post" asp-route-id="@Model.Id" asp-action="SendFriendRequest"
+                      data-ajax="true"
+                      data-ajax-method="POST"
+                      data-ajax-mode="replace"
+                      data-ajax-update="#FriendshipInteraction">
+                <input type="submit" value="Add Friend" />
+            </form>
+        }
+    }
+</div>

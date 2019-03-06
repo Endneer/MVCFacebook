@@ -27,16 +27,6 @@ namespace MVCFacebook.Controllers
             signInManager = _signInManager;
         }
 
-        //
-        //public IActionResult Index_old()
-        //{
-        //    ApplicationUser loggedUser = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
-        //    loggedUser.loadFriendships(context);
-        //    var friends = loggedUser.Friends.Select(x => x.Id);
-        //    ViewBag.posts = (context.Posts.Where(x => x.Creator.Id == signInManager.UserManager.GetUserId(HttpContext.User) || friends.Contains(x.Creator.Id)).OrderByDescending(y => y.CreationDate));
-        //    return View();
-        //}
-
         [AllowAnonymous]
         public IActionResult Index()
         {
@@ -70,6 +60,7 @@ namespace MVCFacebook.Controllers
       
 
         [Authorize]
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Profile(string userName)
         {
             ApplicationUser user =  context.Users.FirstOrDefault(U=>U.UserName == userName);
@@ -83,6 +74,8 @@ namespace MVCFacebook.Controllers
             
         }
 
+
+        #region Image Handling
         [HttpPost]
         public IActionResult UploadImage(IList<IFormFile> files,String id)
         {
@@ -99,17 +92,21 @@ namespace MVCFacebook.Controllers
                 
                 context.SaveChanges();
             }
-            return RedirectToAction("Profile/" + signInManager.UserManager.GetUserName(User));
+            return PartialView("_UserImage" , id);
         }
 
         [HttpGet]
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         public FileStreamResult ViewImage(String id)
         {
-            ApplicationUser user = context.Users.FirstOrDefault(U => U.Id == id);
+            string realId = id.Split("_")[0];
+            ApplicationUser user = context.Users.FirstOrDefault(U => U.Id == realId);
             MemoryStream ms = new MemoryStream(user.Image);
             return new FileStreamResult(ms, user.ContentType);
         }
-        
+        #endregion
+
+
         [HttpPost]
         public IActionResult addPost(string post)
         {
@@ -170,7 +167,7 @@ namespace MVCFacebook.Controllers
 
             LoggedInUser.requestFriendship(context, user);
 
-            return RedirectToAction($"Profile/{user.UserName}");
+            return PartialView("_FriendshipButton" , user);
         }
 
         [HttpPost]
@@ -185,7 +182,10 @@ namespace MVCFacebook.Controllers
 
             context.SaveChanges();
 
-            return RedirectToAction($"Profile/{context.Users.FirstOrDefault(U=>U.Id == Id).UserName}");
+
+            ApplicationUser user = context.Users.FirstOrDefault(u=>u.Id == Id);
+            user.loadFriendships(context);
+            return PartialView("_FriendshipButton", user);
         }
 
         [HttpPost]
@@ -200,7 +200,9 @@ namespace MVCFacebook.Controllers
             loggedInUser.confirmFriendship(context,
                 loggedInUser.FriendRequestsRecieved.FirstOrDefault(u => u.User1ID == id));
 
-            return RedirectToAction(returnUrl);
+            ApplicationUser user = context.Users.FirstOrDefault(u => u.Id == id);
+            user.loadFriendships(context);
+            return PartialView("_FriendshipButton", user);
         }
 
 

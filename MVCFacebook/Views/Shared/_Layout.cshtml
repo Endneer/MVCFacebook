@@ -54,7 +54,7 @@
                                     <a asp-controller="Admin" asp-action="Index">Admin</a>
                                 </li>
                             }
-                        </ul>  
+                        </ul>
                     </form>
                 }
 
@@ -79,6 +79,12 @@
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="~/lib/jquery-ajax-unobtrusive/jquery.unobtrusive-ajax.js"></script>
+        <script>
+            $("document").ready(function () {
+                $.ajaxSetup({ cache: false });
+            })
+        </script>
         <script src="~/js/site.js" asp-append-version="true"></script>
     </environment>
     <environment exclude="Development">
@@ -94,6 +100,13 @@
                 crossorigin="anonymous"
                 integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
         </script>
+        <script src="~/lib/jquery-ajax-unobtrusive/jquery.unobtrusive-ajax.js"></script>
+        <script>
+            $("document").ready(function () {
+                $.ajaxSetup({ cache: false });
+            })
+        </script>
+
         <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>
 

@@ -1,12 +1,30 @@
-﻿@model List<MVCFacebook.Models.ApplicationUser>
-@*
-    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
-*@
-<form method="post">
+﻿@model List<MVCFacebook.Models.Friendship>
+
+<div>
+
     @foreach (var item in Model)
     {
-        <a asp-action="Profile" asp-route-username="@item.UserName">@item.UserName</a>
-        <input type="submit" value=Accept asp-route-id="@item.Id" asp-action="AcceptFriendRequest" />
-        <input type="submit" value=Reject asp-route-id="@item.Id" asp-action="RejectFriendRequest" />
+
+        <a asp-action="Profile" asp-route-username="@item.User1.UserName">@item.User1.UserName</a>
+        <form asp-action="AcceptFriendRequest" asp-route-id="@item.User1.Id" asp-route-return="FRequest"
+              method="post"
+              data-ajax="true"
+              data-ajax-method="POST"
+              data-ajax-mode="replace"
+              data-ajax-update="#Friends">
+            <input type="submit" value=Accept />
+        </form>
+
+        <form asp-action="RemoveFriend" asp-route-id="@item.User1.Id" asp-route-return="FRequest"
+              method="post"
+              data-ajax="true"
+              data-ajax-method="POST"
+              data-ajax-mode="replace"
+              data-ajax-update="#Friends">
+            <input type="submit" value=Reject  />
+        </form>
+
+        
     }
-</form>
+
+</div>

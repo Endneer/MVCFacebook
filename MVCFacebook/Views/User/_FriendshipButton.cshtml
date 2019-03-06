@@ -8,7 +8,7 @@
     {
         @if (Model.FriendRequestsSent.Any(F => F.User2ID == Usermanager.GetUserId(User) && F.Pending))
         {
-            <form method="post" asp-route-id="@Model.Id" asp-route-returnUrl="@($"{Url.Action()}/{Model.UserName}")" asp-action="AcceptFriendRequest"
+            <form method="post" asp-route-id="@Model.Id" asp-route-returnPartial="FButton" asp-action="AcceptFriendRequest"
                       data-ajax="true"
                       data-ajax-method="POST"
                       data-ajax-mode="replace"
@@ -23,7 +23,7 @@
         }
         else if (Model.Friends.Any(F => F.Id == Usermanager.GetUserId(User)))
         {
-            <form method="post" asp-action="RemoveFriend" asp-route-id="@Model.Id"
+            <form method="post" asp-action="RemoveFriend" asp-route-returnPartial="FButton" asp-route-id="@Model.Id"
                       data-ajax="true"
                       data-ajax-method="POST"
                       data-ajax-mode="replace"

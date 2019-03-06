@@ -1,11 +1,19 @@
-﻿@model List<MVCFacebook.Models.ApplicationUser>
-@*
-    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model MVCFacebook.Models.ApplicationUser
+@inject UserManager<ApplicationUser> Usermanager
+@inject SignInManager<ApplicationUser> Signinmanager
+@inject ApplicationDbContext context
+<div id="Friends">
 
-@foreach (var item in Model)
-{
-    <a asp-action="Profile" asp-route-username="@item.UserName">@item.UserName</a>
-    <br/>
-}
+    @if (Model.Id == Usermanager.GetUserId(User))
+    {
+        <partial name="_FriendRequests.cshtml" model="@Model.getPendingFriendRequests(context)" />
+    }
+    <label>Friends</label><br />
+    @foreach (var item in Model.Friends)
+    {
+        <div>
+            <a asp-action="Profile" asp-route-username="@item.UserName">@($"{item.FirstName} {item.LastName}")</a>
+        </div>
+    }
+</div>
 

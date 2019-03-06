@@ -27,6 +27,11 @@ namespace MVCFacebook.Controllers
             signInManager = _signInManager;
         }
 
+        public IActionResult Settings()
+        {
+            return View();
+        }
+
         [AllowAnonymous]
         public IActionResult Index()
         {
@@ -106,7 +111,7 @@ namespace MVCFacebook.Controllers
         }
         #endregion
 
-
+        #region Post / Comment Operations
         [HttpPost]
         public IActionResult addPost(string post)
         {
@@ -155,10 +160,9 @@ namespace MVCFacebook.Controllers
             usr.toggleLike(myPost, context);
             return RedirectToAction("home");
         }
-        public IActionResult Settings()
-        {
-            return View();
-        }
+        #endregion
+
+        #region Friendship Operations
         [HttpPost]
         public IActionResult SendFriendRequest(string Id )
         {
@@ -171,7 +175,7 @@ namespace MVCFacebook.Controllers
         }
 
         [HttpPost]
-        public IActionResult RemoveFriend(string Id)
+        public IActionResult RemoveFriend(string Id , string returnPartial)
         {
             ApplicationUser LoggedInUser = context.Users.FirstOrDefault(a => a.Id == signInManager.UserManager.GetUserId(User));
 
@@ -185,13 +189,17 @@ namespace MVCFacebook.Controllers
 
             ApplicationUser user = context.Users.FirstOrDefault(u=>u.Id == Id);
             user.loadFriendships(context);
-            return PartialView("_FriendshipButton", user);
+
+            if (returnPartial == "FButton")
+                return PartialView("_FriendshipButton", user);
+            else
+                return PartialView("_Friends", LoggedInUser);
         }
 
         [HttpPost]
-        public IActionResult AcceptFriendRequest(string id,string returnUrl)
+        public IActionResult AcceptFriendRequest(string id,string returnPartial)
         {
-
+            
             string loggedInUserID = signInManager.UserManager.GetUserId(User);
             var loggedInUser = context.Users.FirstOrDefault(u => u.Id == loggedInUserID);
 
@@ -202,9 +210,14 @@ namespace MVCFacebook.Controllers
 
             ApplicationUser user = context.Users.FirstOrDefault(u => u.Id == id);
             user.loadFriendships(context);
-            return PartialView("_FriendshipButton", user);
-        }
 
+            if(returnPartial == "FButton")
+                return PartialView("_FriendshipButton", user);
+            else
+                return PartialView("_Friends", loggedInUser);
+
+        }
+        #endregion
 
     }
 }

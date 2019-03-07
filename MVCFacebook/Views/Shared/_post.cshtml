@@ -1,24 +1,18 @@
-﻿<span>@ViewBag.post.Text</span>
-<form method="post">
-    <input type="submit" value="x" asp-action="DeletePost" class="btn btn-danger" asp-route-post=@ViewBag.post.ID>
+﻿@model Post
+<span>@Model.Text</span>
+<form method="post"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-mode="replace"
+      data-ajax-update="#listPost"
+      asp-action="DeletePost"
+      asp-route-post=@Model.ID>
+    <input type="submit" value="x" class="btn btn-danger">
 </form>
-<form method="post">
-    <input type="submit" value="toggle like" asp-action="toggleLike" class="btn btn-info" asp-route-post=@ViewBag.post.ID>
-</form>
-<table>
-    @foreach (var item in ViewBag.post.Comments)
-    {
-        if (item.State == PostState.Active)
-        {
-            ViewBag.comment = item;
-            <tr>
-                <td>
-                    <partial name="_comment" />
-                </td>
-            </tr>
-        }
-
-
-    }
-</table>
-<partial name="_addComment" />
+<div id="@($"like_{Model.ID}")">
+    <partial name="_likes" model="Model" />
+</div>
+<div id="@($"comments_{Model.ID}")">
+    <partial name="_listComments" model="Model" />
+    
+</div>

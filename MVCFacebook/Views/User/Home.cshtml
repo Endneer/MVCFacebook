@@ -1,9 +1,10 @@
-﻿
+﻿@model ICollection<Post>
 @{
     ViewData["Title"] = "Home";
 }
 
 <h2>Home</h2>
-
 <partial name="_addPost" />
-<partial name="_listPosts" />
+<div id="listPost">
+    <partial name="_listPosts" model="Model" />
+</div>

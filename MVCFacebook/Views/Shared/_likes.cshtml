@@ -1,0 +1,18 @@
+﻿@model Post
+<span>@Model.Likes.Count</span>
+<div>
+    @foreach(var item in Model.Likes)
+    {
+    <span>
+        @(item.LikingUser.FirstName +" "+item.LikingUser.LastName)
+    </span>
+    }
+</div>
+<form method="post" asp-action="toggleLike"  asp-route-post=@Model.ID
+       data-ajax="true"
+          data-ajax-method="POST"
+          data-ajax-mode="replce"
+          data-ajax-update="@($"#like_{Model.ID}")"
+>
+    <input type="submit" value="toggle like"  class="btn btn-info">
+</form>

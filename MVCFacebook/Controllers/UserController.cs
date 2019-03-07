@@ -37,10 +37,10 @@ namespace MVCFacebook.Controllers
         {
             if (signInManager.IsSignedIn(User))
             {
-                ApplicationUser loggedinUser = context.Users.FirstOrDefault( U => U.Id == signInManager.UserManager.GetUserId(User));
-                if (signInManager.UserManager.IsInRoleAsync(loggedinUser , "Admin").Result)
+                ApplicationUser loggedinUser = context.Users.FirstOrDefault(U => U.Id == signInManager.UserManager.GetUserId(User));
+                if (signInManager.UserManager.IsInRoleAsync(loggedinUser, "Admin").Result)
                 {
-                    return RedirectToAction("Index" , "Admin");       
+                    return RedirectToAction("Index", "Admin");
                 }
                 return RedirectToAction("Home");
             }
@@ -53,36 +53,37 @@ namespace MVCFacebook.Controllers
             ApplicationUser loggedUser = context.Users.FirstOrDefault(x => x.Id == UM.GetUserId(HttpContext.User));
             loggedUser.loadFriendships(context);
             var friends = loggedUser.Friends.Select(x => x.Id);
-            ViewBag.posts = (context.Posts.Include(p => p.Comments)
+            var postBag = (context.Posts.Include(p => p.Comments).Include(p=>p.Likes).Include("Likes.LikingUser")
                 .Where(x => (x.Creator.Id ==
                         UM.GetUserId(HttpContext.User)
                         || friends.Contains(x.Creator.Id))
                                 && x.State == PostState.Active
                         ).OrderByDescending(y => y.CreationDate));
             
-            return View();
+            return View(postBag.ToList<Post>());
         }
-      
+
 
         [Authorize]
         [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Profile(string userName)
         {
-            ApplicationUser user =  context.Users.FirstOrDefault(U=>U.UserName == userName);
+            ApplicationUser user = context.Users.FirstOrDefault(U => U.UserName == userName);
 
-            if (user != null) {
+            if (user != null)
+            {
                 user.loadFriendships(context);
                 return View(user);
             }
             else
                 return RedirectToAction(nameof(Index));
-            
+
         }
 
 
         #region Image Handling
         [HttpPost]
-        public IActionResult UploadImage(IList<IFormFile> files,String id)
+        public IActionResult UploadImage(IList<IFormFile> files, String id)
         {
             IFormFile uploadedImage = files.FirstOrDefault();
 
@@ -91,13 +92,13 @@ namespace MVCFacebook.Controllers
                 MemoryStream ms = new MemoryStream();
                 uploadedImage.OpenReadStream().CopyTo(ms);
 
-                ApplicationUser user = context.Users.FirstOrDefault(U=> U.Id == id);
+                ApplicationUser user = context.Users.FirstOrDefault(U => U.Id == id);
                 user.Image = ms.ToArray();
                 user.ContentType = uploadedImage.ContentType;
-                
+
                 context.SaveChanges();
             }
-            return PartialView("_UserImage" , id);
+            return PartialView("_UserImage", id);
         }
 
         [HttpGet]
@@ -115,42 +116,63 @@ namespace MVCFacebook.Controllers
         [HttpPost]
         public IActionResult addPost(string post)
         {
+            ApplicationUser loggedUser = context.Users.FirstOrDefault(x => x.Id == UM.GetUserId(HttpContext.User));
+
             if (post != null && post.Length > 0)
             {
-                var Creator = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
-                Creator.createPost(post,context);
+                // var Creator = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User)); 
+
+                loggedUser.createPost(post, context);
+                loggedUser.loadFriendships(context);
             }
-            return RedirectToAction("Home");//ajax
+            var friends = loggedUser.Friends.Select(x => x.Id);
+            var postBag = (context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser")
+                 .Where(x => (x.Creator.Id ==
+                         UM.GetUserId(HttpContext.User)
+                         || friends.Contains(x.Creator.Id))
+                                 && x.State == PostState.Active
+                         ).OrderByDescending(y => y.CreationDate)).ToList<Post>();
+            return PartialView("_listPosts", postBag);//ajax
         }
-        
+
         [HttpPost]
         public IActionResult DeletePost(int post)
-        {            
+        {
             var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
-            var myPost = context.Posts.FirstOrDefault(p => p.ID==post);
+            var myPost = context.Posts.FirstOrDefault(p => p.ID == post);
             usr.deletePost(myPost, context);
-            return RedirectToAction("Home");
+            usr.loadFriendships(context);
+            var friends = usr.Friends.Select(x => x.Id);
+            var postBag = (context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser")
+                   .Where(x => (x.Creator.Id ==
+                           UM.GetUserId(HttpContext.User)
+                           || friends.Contains(x.Creator.Id))
+                                   && x.State == PostState.Active
+                           ).OrderByDescending(y => y.CreationDate)).ToList<Post>();
+            return PartialView("_listPosts",postBag);
         }
-        
+
         [HttpPost]
-        public IActionResult addComment(string commentText,int postId)
+        public IActionResult addComment(string commentText, int postId)
         {
             var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
             var post = context.Posts.FirstOrDefault(p => p.ID == postId);
-            usr.commentOnPost(post,commentText,context);
-            return RedirectToAction("Home");
+            usr.commentOnPost(post, commentText, context);
+            var postBag = context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser").FirstOrDefault(p => p.ID == postId);
+            return PartialView("_listComments", postBag);
         }
         [HttpPost]
-        public IActionResult DeleteComment(int commentId,int postId)
+        public IActionResult DeleteComment(int commentId, int postId)
         {
             
             var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
-            //  context.Entry(usr).Collection(u => u.Comments).Load();
             var post = context.Posts.FirstOrDefault(p => p.ID == postId);
             context.Entry(post).Collection(u => u.Comments).Load();
             var myComment = post.Comments.FirstOrDefault(p => p.ID == commentId);
             usr.deleteComment(myComment, context);
-            return RedirectToAction("home");
+            var postBag = context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser").FirstOrDefault(p => p.ID == postId);
+            return PartialView("_listComments", postBag);
+           // return RedirectToAction("home");
         }
         [HttpPost]
         public IActionResult toggleLike(int post)
@@ -158,36 +180,38 @@ namespace MVCFacebook.Controllers
             var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
             var myPost = context.Posts.FirstOrDefault(p => p.ID == post);
             usr.toggleLike(myPost, context);
-            return RedirectToAction("home");
+            var postBag = context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser").FirstOrDefault(p => p.ID == post);
+            return PartialView("_likes", postBag);
+            //return RedirectToAction("home");
         }
         #endregion
 
         #region Friendship Operations
         [HttpPost]
-        public IActionResult SendFriendRequest(string Id )
+        public IActionResult SendFriendRequest(string Id)
         {
             var user = context.Users.FirstOrDefault(a => a.Id == Id);
             var LoggedInUser = context.Users.FirstOrDefault(a => a.Id == signInManager.UserManager.GetUserId(User));
 
             LoggedInUser.requestFriendship(context, user);
 
-            return PartialView("_FriendshipButton" , user);
+            return PartialView("_FriendshipButton", user);
         }
 
         [HttpPost]
-        public IActionResult RemoveFriend(string Id , string returnPartial)
+        public IActionResult RemoveFriend(string Id, string returnPartial)
         {
             ApplicationUser LoggedInUser = context.Users.FirstOrDefault(a => a.Id == signInManager.UserManager.GetUserId(User));
 
             LoggedInUser.loadFriendships(context);
 
-            LoggedInUser.FriendRequestsRecieved.Remove(LoggedInUser.FriendRequestsRecieved.FirstOrDefault(F=>F.User1ID == Id));
-            LoggedInUser.FriendRequestsSent.Remove(LoggedInUser.FriendRequestsSent.FirstOrDefault(F=>F.User2ID == Id));
+            LoggedInUser.FriendRequestsRecieved.Remove(LoggedInUser.FriendRequestsRecieved.FirstOrDefault(F => F.User1ID == Id));
+            LoggedInUser.FriendRequestsSent.Remove(LoggedInUser.FriendRequestsSent.FirstOrDefault(F => F.User2ID == Id));
 
             context.SaveChanges();
 
 
-            ApplicationUser user = context.Users.FirstOrDefault(u=>u.Id == Id);
+            ApplicationUser user = context.Users.FirstOrDefault(u => u.Id == Id);
             user.loadFriendships(context);
 
             if (returnPartial == "FButton")
@@ -197,9 +221,9 @@ namespace MVCFacebook.Controllers
         }
 
         [HttpPost]
-        public IActionResult AcceptFriendRequest(string id,string returnPartial)
+        public IActionResult AcceptFriendRequest(string id, string returnPartial)
         {
-            
+
             string loggedInUserID = signInManager.UserManager.GetUserId(User);
             var loggedInUser = context.Users.FirstOrDefault(u => u.Id == loggedInUserID);
 
@@ -211,7 +235,7 @@ namespace MVCFacebook.Controllers
             ApplicationUser user = context.Users.FirstOrDefault(u => u.Id == id);
             user.loadFriendships(context);
 
-            if(returnPartial == "FButton")
+            if (returnPartial == "FButton")
                 return PartialView("_FriendshipButton", user);
             else
                 return PartialView("_Friends", loggedInUser);

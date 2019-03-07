@@ -1,6 +1,14 @@
-﻿<div>
-    <form method="post">
-        <textarea placeholder="what's in your mind!!"  name="post"></textarea>
-        <input type="submit" value="Post" asp-action="addPost" asp-controller="User" />
+﻿
+<div>
+    <form method="post" asp-action="addPost" asp-controller="User"
+          data-ajax="true"
+          data-ajax-method="POST"
+          data-ajax-mode="replce"
+          data-ajax-update="#listPost"
+              >
+        <textarea placeholder="what's in your mind!!" name="post" id="txt" ></textarea>
+        <input type="submit" value="Post" />
     </form>
 </div>
+
+

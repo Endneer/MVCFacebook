@@ -1,11 +1,18 @@
-﻿<table>
-    @foreach(var item in ViewBag.posts)
-    {
-        ViewBag.post = item;
-        <tr>
-            <td>
-                <partial name="_post" />
-            </td>
-        </tr>
-    }
-</table>
+﻿@model ICollection<Post>
+
+   <script>
+       document.getElementById("txt").value = "";
+   </script>
+
+    <table>
+        @foreach (var item in Model)
+        {   
+            <tr>
+                <td>
+                    <partial name="_post" model="item"/>
+                </td>
+            </tr>
+        }
+    </table>
+
+

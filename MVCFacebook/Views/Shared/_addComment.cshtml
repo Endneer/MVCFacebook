@@ -1,7 +1,15 @@
-﻿
+﻿@model Post
 <div>
-    <form method="post">
-        <textarea placeholder="write here!" name="commentText"></textarea>
-        <input type="submit" value="Comment" asp-action="addComment" asp-controller="User" asp-route-postID=@ViewBag.post.ID />
+    
+    <form method="post" asp-action="addComment" asp-controller="User" asp-route-postID=@Model.ID
+          data-ajax="true"
+          data-ajax-method="POST"
+          data-ajax-mode="replace"
+          data-ajax-update="@($"#comments_{Model.ID}")">
+        <textarea placeholder="write here!" name="commentText" id='@($"commentTxt_{Model.ID}")'></textarea>
+        <input type="submit" value="Comment" />
+
     </form>
 </div>
+
+

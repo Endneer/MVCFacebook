@@ -1,5 +1,12 @@
-﻿
-<label> @ViewBag.comment.CommentText </label>
-<form method="post">
-    <input type="submit" value="x" asp-action="DeleteComment" class="btn btn-danger" asp-route-commentId=@ViewBag.comment.ID asp-route-postId=@ViewBag.comment.PostID >
+﻿@model UserComment
+<label> @Model.CommentText </label>
+<form method="post" data-ajax="true"
+          data-ajax-method="POST"
+          data-ajax-mode="replace"
+          data-ajax-update="@($"#comments_{Model.PostID}")"
+            asp-action="DeleteComment"
+            asp-route-commentId=@Model.ID
+            asp-route-postId=@Model.PostID
+            >
+    <input type="submit" value="x"  class="btn btn-danger"  >
 </form>

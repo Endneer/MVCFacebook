@@ -1,0 +1,19 @@
+﻿@model Post
+
+    <table>
+
+        @foreach (var item in Model.Comments)
+        {
+           
+            if (item.State == PostState.Active)
+            {
+                <tr>
+                    <td>
+                        <partial name="_comment" model="item" />
+                    </td>
+                </tr>
+            }
+        }
+
+    </table>
+    <partial name="_addComment" model="Model" />

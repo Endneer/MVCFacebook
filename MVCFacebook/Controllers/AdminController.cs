@@ -12,6 +12,7 @@ using MVCFacebook.Models.AccountViewModels;
 
 namespace MVCFacebook.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private ApplicationDbContext context;
@@ -35,17 +36,26 @@ namespace MVCFacebook.Controllers
             _logger = logger;
         }
 
+        public IActionResult Index()
+        {
+            //searchResult = null;
+            return View(context.Users.ToList());
+
+        }
+
+        [HttpPost]
         public IActionResult Index(string value)
         {
             if (value == null)
-            {
-                return View(context.Users.ToList());
-            }
+                return PartialView("_AdminUserList", context.Users.ToList());
             else
             {
-                return View(context.Users.Where(u => string.Concat(u.UserName, u.FirstName, u.LastName).Contains(value)).ToList());
+                var searchResult = context.Users.Where(u => string.Concat(u.UserName, u.FirstName, u.LastName).Contains(value)).ToList();
+                return PartialView("_AdminUserList", searchResult);
             }
+            //return View(context.Users.Where(u => string.Concat(u.UserName, u.FirstName, u.LastName).Contains(value)).ToList());
         }
+
 
         [HttpGet]
         [AllowAnonymous]
@@ -61,7 +71,9 @@ namespace MVCFacebook.Controllers
             user.State = AccountState.Blocked;
             context.SaveChanges();
 
-            return RedirectToAction("Index");
+            //   return RedirectToAction("Index");
+            return PartialView("_User", user);
+
         }
         [HttpPost]
         public IActionResult Unblock(string id)
@@ -70,7 +82,8 @@ namespace MVCFacebook.Controllers
             user.State = AccountState.Active;
             context.SaveChanges();
 
-            return RedirectToAction("Index");
+            return PartialView("_User", user);
+            //  return RedirectToAction("Index");
         }
 
         [HttpPost]

@@ -56,6 +56,10 @@
                             }
                         </ul>
                     </form>
+                    @if (UserManager.IsInRoleAsync(Context.Users.FirstOrDefault(U => U.Id == UserManager.GetUserId(User)), "Member").Result)
+                    {
+                        <partial name="_search" />
+                    }
                 }
 
 

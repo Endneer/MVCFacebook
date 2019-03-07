@@ -30,6 +30,10 @@
 }
 
 <div>
+    @if (Model.Id == Usermanager.GetUserId(User))
+    {
+        <a asp-action="EditInfo" asp-controller="User">Edit Info</a>
+    }
     <h1>@($"{Model.FirstName} {Model.LastName}")</h1>
     <label>@Model.Gender.ToString()</label><br />
     <p>@Model.Bio</p>

@@ -6,6 +6,15 @@
 <h2>Settings</h2>
 
 <div>
-    <div> Change Password Form  </div>
-</div>
 
+    <form asp-action="EditPassword" asp-controller="User" method="post">
+        <label>Enter your old password</label>
+        <input type="password" name="oldPassword" />
+        <label>Enter the new password</label>
+        <input type="password" name="newPassword" />
+        <label>Confirm password</label>
+        <input type="password" name="confirmPassword" />
+        <input type="submit" />
+    </form>
+
+</div>

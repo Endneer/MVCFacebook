@@ -53,13 +53,13 @@ namespace MVCFacebook.Controllers
             ApplicationUser loggedUser = context.Users.FirstOrDefault(x => x.Id == UM.GetUserId(HttpContext.User));
             loggedUser.loadFriendships(context);
             var friends = loggedUser.Friends.Select(x => x.Id);
-            var postBag = (context.Posts.Include(p => p.Comments).Include(p=>p.Likes).Include("Likes.LikingUser")
+            var postBag = (context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser")
                 .Where(x => (x.Creator.Id ==
                         UM.GetUserId(HttpContext.User)
                         || friends.Contains(x.Creator.Id))
                                 && x.State == PostState.Active
                         ).OrderByDescending(y => y.CreationDate));
-            
+
             return View(postBag.ToList<Post>());
         }
 
@@ -149,7 +149,7 @@ namespace MVCFacebook.Controllers
                            || friends.Contains(x.Creator.Id))
                                    && x.State == PostState.Active
                            ).OrderByDescending(y => y.CreationDate)).ToList<Post>();
-            return PartialView("_listPosts",postBag);
+            return PartialView("_listPosts", postBag);
         }
 
         [HttpPost]
@@ -164,7 +164,7 @@ namespace MVCFacebook.Controllers
         [HttpPost]
         public IActionResult DeleteComment(int commentId, int postId)
         {
-            
+
             var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
             var post = context.Posts.FirstOrDefault(p => p.ID == postId);
             context.Entry(post).Collection(u => u.Comments).Load();
@@ -172,7 +172,7 @@ namespace MVCFacebook.Controllers
             usr.deleteComment(myComment, context);
             var postBag = context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser").FirstOrDefault(p => p.ID == postId);
             return PartialView("_listComments", postBag);
-           // return RedirectToAction("home");
+            // return RedirectToAction("home");
         }
         [HttpPost]
         public IActionResult toggleLike(int post)
@@ -242,6 +242,51 @@ namespace MVCFacebook.Controllers
 
         }
         #endregion
+
+
+        [HttpGet]
+        public IActionResult Search(string searchText)
+        {
+            var searchResult = UM.GetUsersInRoleAsync("Member").Result.
+                Where(u => string.Concat(u.UserName, u.FirstName, u.LastName).Contains(searchText)
+                          && (u.State == AccountState.Active)).ToList();
+
+            return View(searchResult);
+        }
+
+        [HttpGet]
+        public IActionResult EditInfo()
+        {
+
+            return View(context.Users.FirstOrDefault(u => u.Id == UM.GetUserId(User)));
+        }
+
+        [HttpPost]
+        public IActionResult EditInfo(ApplicationUser viewUser)
+        {
+            var user = context.Users.FirstOrDefault(u => u.Id == viewUser.Id);
+            user.FirstName = viewUser.FirstName;
+            user.LastName = viewUser.LastName;
+            user.Bio = viewUser.Bio;
+            user.Gender = viewUser.Gender;
+            user.BirthDate = viewUser.BirthDate;
+            context.SaveChanges();
+            return RedirectToAction("Profile", new { userName = user.UserName });
+
+        }
+
+        [HttpPost]
+        public IActionResult EditPassword(string oldPassword,string newPassword, string confirmPassword)
+        {
+            var user = context.Users.FirstOrDefault(u => u.Id == UM.GetUserId(User));
+            if (newPassword == confirmPassword)
+            {
+                UM.ChangePasswordAsync(user, oldPassword, newPassword).Wait();
+                context.SaveChanges();
+            }
+            return RedirectToAction("Profile", new { userName = user.UserName });
+        }
+
 
     }
 }

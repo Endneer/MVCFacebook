@@ -42,8 +42,8 @@ namespace MVCFacebook.Controllers
             return View(context.Users.ToList());
 
         }
-
-        [HttpPost]
+ 
+       [HttpPost]
         public IActionResult Index(string value)
         {
             if (value == null)

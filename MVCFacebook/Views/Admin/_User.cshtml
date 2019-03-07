@@ -1,0 +1,32 @@
+﻿@model ApplicationUser
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+<div id="@Model.Id">
+    <a asp-action="Profile" asp-controller="User" asp-route-username="@Model.UserName">@Model.UserName</a>
+    @if (Model.State == AccountState.Blocked)
+    {
+        <form method="post" asp-controller="Admin" asp-action="Unblock" asp-route-id="@Model.Id"
+              data-ajax="true"
+              data-ajax-method="POST"
+              data-ajax-mode="replace"
+              data-ajax-update="#@Model.Id">
+            <input type="submit" value="Unblock" />
+        </form>
+
+    }
+    else
+    {
+        <form method="post" asp-controller="Admin" asp-action="Block" asp-route-id="@Model.Id"
+              data-ajax="true"
+              data-ajax-method="POST"
+              data-ajax-mode="replace"
+              data-ajax-update="#@Model.Id">
+            <input type="submit" value="Block" />
+        </form>
+
+    }
+
+    <br />
+</div>

@@ -53,14 +53,14 @@ namespace MVCFacebook.Controllers
             ApplicationUser loggedUser = context.Users.FirstOrDefault(x => x.Id == UM.GetUserId(HttpContext.User));
             loggedUser.loadFriendships(context);
             var friends = loggedUser.Friends.Select(x => x.Id);
-            var postBag = (context.Posts.Include(p => p.Comments).Include(p=>p.Likes).Include("Likes.LikingUser")
+            var postBag = (context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser")
                 .Where(x => (x.Creator.Id ==
                         UM.GetUserId(HttpContext.User)
                         || friends.Contains(x.Creator.Id))
                                 && x.State == PostState.Active
-                        ).OrderByDescending(y => y.CreationDate));
-            
-            return View(postBag.ToList<Post>());
+                        ).OrderByDescending(y => y.CreationDate)).ToList<Post>();
+
+            return View(postBag);
         }
 
 
@@ -68,8 +68,8 @@ namespace MVCFacebook.Controllers
         [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Profile(string userName)
         {
-            ApplicationUser user = context.Users.FirstOrDefault(U => U.UserName == userName);
-
+            ApplicationUser user = context.Users.Include(u => u.Posts).Include("Posts.Comments").Include("Posts.Likes").FirstOrDefault(U => U.UserName == userName);
+            user.Posts = user.Posts.Where(p => p.State == PostState.Active).ToList<Post>();
             if (user != null)
             {
                 user.loadFriendships(context);
@@ -114,7 +114,7 @@ namespace MVCFacebook.Controllers
 
         #region Post / Comment Operations
         [HttpPost]
-        public IActionResult addPost(string post)
+        public IActionResult addPost(string post,string source)
         {
             ApplicationUser loggedUser = context.Users.FirstOrDefault(x => x.Id == UM.GetUserId(HttpContext.User));
 
@@ -126,30 +126,57 @@ namespace MVCFacebook.Controllers
                 loggedUser.loadFriendships(context);
             }
             var friends = loggedUser.Friends.Select(x => x.Id);
-            var postBag = (context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser")
-                 .Where(x => (x.Creator.Id ==
-                         UM.GetUserId(HttpContext.User)
-                         || friends.Contains(x.Creator.Id))
-                                 && x.State == PostState.Active
-                         ).OrderByDescending(y => y.CreationDate)).ToList<Post>();
+            List<Post> postBag;
+            ;
+            if (source.StartsWith("/User/"))
+            {
+                postBag = (context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser")
+                                .Where(x => (x.Creator.Id ==
+                            UM.GetUserId(HttpContext.User)
+                        || friends.Contains(x.Creator.Id))
+                                     && x.State == PostState.Active
+                                    ).OrderByDescending(y => y.CreationDate)).ToList<Post>();
+            }
+            else
+            {
+                postBag = (context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser")
+                                .Where(x => x.Creator.Id ==
+                                         UM.GetUserId(HttpContext.User)
+                                            && x.State == PostState.Active
+                                             ).OrderByDescending(y => y.CreationDate)).ToList<Post>();
+            }
+           
             return PartialView("_listPosts", postBag);//ajax
         }
 
         [HttpPost]
-        public IActionResult DeletePost(int post)
+        public IActionResult DeletePost(int post, string source)
         {
             var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
             var myPost = context.Posts.FirstOrDefault(p => p.ID == post);
             usr.deletePost(myPost, context);
             usr.loadFriendships(context);
             var friends = usr.Friends.Select(x => x.Id);
-            var postBag = (context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser")
-                   .Where(x => (x.Creator.Id ==
-                           UM.GetUserId(HttpContext.User)
-                           || friends.Contains(x.Creator.Id))
-                                   && x.State == PostState.Active
-                           ).OrderByDescending(y => y.CreationDate)).ToList<Post>();
-            return PartialView("_listPosts",postBag);
+            ;
+            List<Post> postBag;
+            if (source.StartsWith("/User/"))
+            {
+                postBag = (context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser")
+                                .Where(x => (x.Creator.Id ==
+                            UM.GetUserId(HttpContext.User)
+                        || friends.Contains(x.Creator.Id))
+                                     && x.State == PostState.Active
+                                    ).OrderByDescending(y => y.CreationDate)).ToList<Post>();
+            }
+            else
+            {
+                postBag = (context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser")
+                                .Where(x => x.Creator.Id ==
+                                         UM.GetUserId(HttpContext.User)
+                                            && x.State == PostState.Active
+                                             ).OrderByDescending(y => y.CreationDate)).ToList<Post>();
+            }
+            return PartialView("_listPosts", postBag);
         }
 
         [HttpPost]
@@ -164,7 +191,7 @@ namespace MVCFacebook.Controllers
         [HttpPost]
         public IActionResult DeleteComment(int commentId, int postId)
         {
-            
+
             var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
             var post = context.Posts.FirstOrDefault(p => p.ID == postId);
             context.Entry(post).Collection(u => u.Comments).Load();
@@ -172,7 +199,7 @@ namespace MVCFacebook.Controllers
             usr.deleteComment(myComment, context);
             var postBag = context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser").FirstOrDefault(p => p.ID == postId);
             return PartialView("_listComments", postBag);
-           // return RedirectToAction("home");
+            // return RedirectToAction("home");
         }
         [HttpPost]
         public IActionResult toggleLike(int post)

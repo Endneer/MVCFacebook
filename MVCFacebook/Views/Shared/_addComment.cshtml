@@ -5,7 +5,8 @@
           data-ajax="true"
           data-ajax-method="POST"
           data-ajax-mode="replace"
-          data-ajax-update="@($"#comments_{Model.ID}")">
+          data-ajax-update="@($"#comments_{Model.ID}")"
+            >
         <textarea placeholder="write here!" name="commentText" id='@($"commentTxt_{Model.ID}")'></textarea>
         <input type="submit" value="Comment" />
 

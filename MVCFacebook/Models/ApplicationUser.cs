@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using System.Drawing;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace MVCFacebook.Models
 {
@@ -171,6 +172,25 @@ namespace MVCFacebook.Models
 
             context.SaveChanges();
             return foundLike != null;
+        }
+
+
+        public ICollection<Post> getPosts(bool includeFriends, Data.ApplicationDbContext context)
+        {
+            if (includeFriends)
+            {
+                loadFriendships(context);
+                return context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser")
+                    .Include("Comments.CommentingUser").Where(
+                    p => (p.Creator.Id == Id || Friends.Select(F => F.Id).Contains(p.Creator.Id))
+                    && p.State == PostState.Active
+                    ).OrderByDescending(p => p.CreationDate).ToList();
+            }
+
+            return context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser")
+                    .Include("Comments.CommentingUser").Where(
+                    p => p.Creator.Id == Id && p.State == PostState.Active
+                    ).OrderByDescending(p => p.CreationDate).ToList();
         }
 
     }

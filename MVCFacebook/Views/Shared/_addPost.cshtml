@@ -1,13 +1,12 @@
-﻿
-<div>
+﻿<div>
     <form method="post" asp-action="addPost" asp-controller="User"
           data-ajax="true"
           data-ajax-method="POST"
-          data-ajax-mode="replce"
+          data-ajax-mode="replace"
           data-ajax-update="#listPost"
-            asp-route-source=@Context.Request.Path
+          asp-route-source=@Context.Request.Path
               >
-        <textarea placeholder="what's in your mind!!" name="post" id="txt" ></textarea>
+        <textarea placeholder="what's on your mind!!" name="post" id="txt" ></textarea>
         <input type="submit" value="Post" />
     </form>
 </div>

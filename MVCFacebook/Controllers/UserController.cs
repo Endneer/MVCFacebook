@@ -27,6 +27,8 @@ namespace MVCFacebook.Controllers
             signInManager = _signInManager;
         }
 
+
+        #region Unsorted
         public IActionResult Settings()
         {
             return View();
@@ -51,16 +53,7 @@ namespace MVCFacebook.Controllers
         public IActionResult Home()
         {
             ApplicationUser loggedUser = context.Users.FirstOrDefault(x => x.Id == UM.GetUserId(HttpContext.User));
-            loggedUser.loadFriendships(context);
-            var friends = loggedUser.Friends.Select(x => x.Id);
-            var postBag = (context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser")
-                .Where(x => (x.Creator.Id ==
-                        UM.GetUserId(HttpContext.User)
-                        || friends.Contains(x.Creator.Id))
-                                && x.State == PostState.Active
-                        ).OrderByDescending(y => y.CreationDate)).ToList<Post>();
-
-            return View(postBag);
+            return View(loggedUser.getPosts(true, context));
         }
 
 
@@ -80,6 +73,49 @@ namespace MVCFacebook.Controllers
 
         }
 
+        [HttpGet]
+        public IActionResult Search(string searchText)
+        {
+            var searchResult = UM.GetUsersInRoleAsync("Member").Result.
+                Where(u => string.Concat(u.UserName, u.FirstName, u.LastName).Contains(searchText)
+                          && (u.State == AccountState.Active)).ToList();
+
+            return View(searchResult);
+        }
+
+        [HttpGet]
+        public IActionResult EditInfo()
+        {
+
+            return View(context.Users.FirstOrDefault(u => u.Id == UM.GetUserId(User)));
+        }
+
+        [HttpPost]
+        public IActionResult EditInfo(ApplicationUser viewUser)
+        {
+            var user = context.Users.FirstOrDefault(u => u.Id == viewUser.Id);
+            user.FirstName = viewUser.FirstName;
+            user.LastName = viewUser.LastName;
+            user.Bio = viewUser.Bio;
+            user.Gender = viewUser.Gender;
+            user.BirthDate = viewUser.BirthDate;
+            context.SaveChanges();
+            return RedirectToAction("Profile", new { userName = user.UserName });
+
+        }
+
+        [HttpPost]
+        public IActionResult EditPassword(string oldPassword, string newPassword, string confirmPassword)
+        {
+            var user = context.Users.FirstOrDefault(u => u.Id == UM.GetUserId(User));
+            if (newPassword == confirmPassword)
+            {
+                UM.ChangePasswordAsync(user, oldPassword, newPassword).Wait();
+                context.SaveChanges();
+            }
+            return RedirectToAction("Profile", new { userName = user.UserName });
+        }
+        #endregion
 
         #region Image Handling
         [HttpPost]
@@ -114,69 +150,38 @@ namespace MVCFacebook.Controllers
 
         #region Post / Comment Operations
         [HttpPost]
-        public IActionResult addPost(string post,string source)
+        public IActionResult addPost(string post, string source)
         {
+            // Getting Logged in User
             ApplicationUser loggedUser = context.Users.FirstOrDefault(x => x.Id == UM.GetUserId(HttpContext.User));
 
+            // Inserting Post if post text is valid
             if (post != null && post.Length > 0)
             {
-                // var Creator = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User)); 
-
                 loggedUser.createPost(post, context);
-                loggedUser.loadFriendships(context);
             }
-            var friends = loggedUser.Friends.Select(x => x.Id);
-            List<Post> postBag;
-            ;
-            if (source.StartsWith("/User/"))
-            {
-                postBag = (context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser")
-                                .Where(x => (x.Creator.Id ==
-                            UM.GetUserId(HttpContext.User)
-                        || friends.Contains(x.Creator.Id))
-                                     && x.State == PostState.Active
-                                    ).OrderByDescending(y => y.CreationDate)).ToList<Post>();
-            }
-            else
-            {
-                postBag = (context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser")
-                                .Where(x => x.Creator.Id ==
-                                         UM.GetUserId(HttpContext.User)
-                                            && x.State == PostState.Active
-                                             ).OrderByDescending(y => y.CreationDate)).ToList<Post>();
-            }
-           
-            return PartialView("_listPosts", postBag);//ajax
-        }
 
+            if (source.StartsWith("/Profile/")) {
+                String ownerUserName = source.Split('/')[2];
+                ApplicationUser ownerUser = context.Users.FirstOrDefault(u => u.UserName == ownerUserName  );
+                return PartialView("_listPosts", ownerUser.getPosts(false, context));
+            }                
+            return PartialView("_listPosts", loggedUser.getPosts(true,context));
+        }
         [HttpPost]
         public IActionResult DeletePost(int post, string source)
         {
             var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
             var myPost = context.Posts.FirstOrDefault(p => p.ID == post);
             usr.deletePost(myPost, context);
-            usr.loadFriendships(context);
-            var friends = usr.Friends.Select(x => x.Id);
-            ;
-            List<Post> postBag;
-            if (source.StartsWith("/User/"))
+
+            if (source.StartsWith("/Profile/"))
             {
-                postBag = (context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser")
-                                .Where(x => (x.Creator.Id ==
-                            UM.GetUserId(HttpContext.User)
-                        || friends.Contains(x.Creator.Id))
-                                     && x.State == PostState.Active
-                                    ).OrderByDescending(y => y.CreationDate)).ToList<Post>();
+                String ownerUserName = source.Split('/')[2];
+                ApplicationUser ownerUser = context.Users.FirstOrDefault(u => u.UserName == ownerUserName);
+                return PartialView("_listPosts", ownerUser.getPosts(false, context));
             }
-            else
-            {
-                postBag = (context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser")
-                                .Where(x => x.Creator.Id ==
-                                         UM.GetUserId(HttpContext.User)
-                                            && x.State == PostState.Active
-                                             ).OrderByDescending(y => y.CreationDate)).ToList<Post>();
-            }
-            return PartialView("_listPosts", postBag);
+            return PartialView("_listPosts", usr.getPosts(true, context));
         }
 
         [HttpPost]

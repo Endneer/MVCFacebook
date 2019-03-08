@@ -2,9 +2,10 @@
 @{
     ViewData["Title"] = "Home";
 }
+@inject UserManager<ApplicationUser> UserManager
 
 <h2>Home</h2>
-<partial name="_addPost" />
+<partial name="_addPost"/>
 <div id="listPost">
     <partial name="_listPosts" model="Model" />
 </div>

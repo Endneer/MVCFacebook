@@ -1,5 +1,7 @@
 ﻿@model UserComment
+@inject UserManager<ApplicationUser> Usermanager
 <label> @Model.CommentText </label>
+@if (Usermanager.GetUserId(User) == Model.CommentingUser.Id || Usermanager.GetUserId(User) == Model.CommentedPost.Creator.Id) { 
 <form method="post" data-ajax="true"
           data-ajax-method="POST"
           data-ajax-mode="replace"
@@ -8,5 +10,6 @@
             asp-route-commentId=@Model.ID
             asp-route-postId=@Model.PostID
             >
-    <input type="submit" value="x"  class="btn btn-danger"  >
+    <input type="submit" value="x"  class="btn btn-danger">
 </form>
+}

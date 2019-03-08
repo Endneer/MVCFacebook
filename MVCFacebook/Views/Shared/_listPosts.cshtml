@@ -4,15 +4,11 @@
        document.getElementById("txt").value = "";
    </script>
 
-    <table>
+    <div>
         @foreach (var item in Model)
         {   
-            <tr>
-                <td>
                     <partial name="_post" model="item"/>
-                </td>
-            </tr>
         }
-    </table>
+    </div>
 
 

@@ -7,8 +7,10 @@
           data-ajax-mode="replace"
           data-ajax-update="@($"#comments_{Model.ID}")"
             >
-        <textarea placeholder="write here!" name="commentText" id='@($"commentTxt_{Model.ID}")'></textarea>
-        <input type="submit" value="Comment" />
+        
+        <input class="rounded-pill comment-box" type="text" placeholder="write here!" name="commentText" id='@($"commentTxt_{Model.ID}")'/>
+        
+        <input type="submit" value="Comment" class="btn btn-outline-success my-2 my-sm-0 rounded-pill comment-submit"/>
 
     </form>
 </div>

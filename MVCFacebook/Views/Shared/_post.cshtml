@@ -1,27 +1,35 @@
 ﻿@model Post
 @inject UserManager<ApplicationUser> UserManager
 
-<span>@Model.Text</span>
+<div class="post-container bg-dark ">
+    <p> @($"{Model.Creator.FirstName} {Model.Creator.LastName}") </p>
 
-@if (UserManager.GetUserId(User) == Model.Creator.Id) { 
-    <form method="post"
-          data-ajax="true"
-          data-ajax-method="POST"
-          data-ajax-mode="replace"
-          data-ajax-update="#listPost"
-          asp-action="DeletePost"
-          asp-route-post=@Model.ID
-          asp-route-source=@Context.Request.Path
-            >
-    
-        <input type="submit" value="x" class="btn btn-danger">
-    </form>
-}
+    <div class="post-text">
+        @Model.Text
+    </div>
 
-<div id="@($"like_{Model.ID}")">
-    <partial name="_likes" model="Model" />
-</div>
-<div id="@($"comments_{Model.ID}")">
-    <partial name="_listComments" model="Model" />
-    
+
+    @if (UserManager.GetUserId(User) == Model.Creator.Id)
+    {
+        <form method="post"
+              data-ajax="true"
+              data-ajax-method="POST"
+              data-ajax-mode="replace"
+              data-ajax-update="#listPost"
+              asp-action="DeletePost"
+              asp-route-post=@Model.ID
+              asp-route-source=@Context.Request.Path>
+
+            <input type="submit" class="btn btn-dark close del-button" value="X">
+        </form>
+    }
+
+
+    <div id="@($"like_{Model.ID}")">
+            <partial name="_likes" model="Model" />
+        </div>
+
+    <div id="@($"comments_{Model.ID}")" class="comment_list">
+        <partial name="_listComments" model="Model" />
+    </div>
 </div>

@@ -6,8 +6,10 @@
           data-ajax-update="#listPost"
           asp-route-source=@Context.Request.Path
               >
-        <textarea placeholder="what's on your mind!!" name="post" id="txt" ></textarea>
-        <input type="submit" value="Post" />
+        <textarea class="form-control" placeholder="what's on your mind!!" name="post" id="txt" ></textarea>
+        <div class="PostButtonContainer">
+            <input type="submit" value="Post" class="btn btn-outline-success my-2 my-sm-0"/>
+        </div>
     </form>
 </div>
 

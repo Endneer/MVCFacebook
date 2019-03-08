@@ -2,17 +2,20 @@
 @inject UserManager<ApplicationUser> Usermanager
 @inject SignInManager<ApplicationUser> Signinmanager
 @inject ApplicationDbContext context
-<div id="Friends">
+<div id="Friends" class="post-container bg-dark profileBio">
 
     @if (Model.Id == Usermanager.GetUserId(User))
     {
         <partial name="_FriendRequests.cshtml" model="@Model.getPendingFriendRequests(context)" />
     }
-    <label>Friends</label><br />
+    <h1>Friends</h1>
+    <br />
     @foreach (var item in Model.Friends)
     {
         <div>
-            <a asp-action="Profile" asp-route-username="@item.UserName">@($"{item.FirstName} {item.LastName}")</a>
+            <a asp-action="Profile" asp-route-username="@item.UserName"><h2 class="bioInfo">
+    @($"{item.FirstName} {item.LastName}")
+</h2></a>
         </div>
     }
 </div>

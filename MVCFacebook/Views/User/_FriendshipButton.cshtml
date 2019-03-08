@@ -14,7 +14,7 @@
                       data-ajax-mode="replace"
                       data-ajax-update="#FriendshipInteraction"
                 >
-                <input type="submit" value="Accept Friend" />
+                <input type="submit" value="Accept Friend" class="btn btn-outline-success my-2 my-sm-0" />
             </form>
         }
         else if (Model.FriendRequestsRecieved.Any(F => F.User1ID == Usermanager.GetUserId(User) && F.Pending))
@@ -29,7 +29,7 @@
                       data-ajax-mode="replace"
                       data-ajax-update="#FriendshipInteraction"
                       >
-                <input type="submit" value="Remove Friend" />
+                <input type="submit" value="Remove Friend"  class="btn btn-outline-success my-2 my-sm-0"/>
             </form>
         }
         else
@@ -39,7 +39,7 @@
                       data-ajax-method="POST"
                       data-ajax-mode="replace"
                       data-ajax-update="#FriendshipInteraction">
-                <input type="submit" value="Add Friend" />
+                <input type="submit" value="Add Friend" class="btn btn-outline-success my-2 my-sm-0"/>
             </form>
         }
     }

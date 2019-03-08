@@ -9,11 +9,86 @@
     <title>@ViewData["Title"] - MVCFacebook</title>
 
    <style>
-       .PageContainer 
+       #frBtn
        {
-            margin:auto;
-            width: 600px ;
-            text-align:center; 
+           position:relative;
+           left:52%;
+           top:200px;
+       }
+       #acpBtn 
+       {
+           position:relative;
+           top:-50px;
+           right:80px;
+       }
+       #rejBtn {
+           position: relative;
+          top:-50px;
+       }
+       .profilePagePostsContainer {
+           margin: auto;
+           position: absolute;
+           right: 1%;
+           top: 15%;
+           width: 45%;
+           text-align: center;
+       }
+       .profilePageInfo {
+           margin: auto;
+           position: absolute;
+           left: 1%;
+           top: 15%;
+           width: 45%;
+           text-align: left;
+           color: white;
+       }
+       .profilePic{
+           position:relative;
+           width:50%;
+           height:300px;
+           border-radius:180px;
+       }
+       .btn-file {
+           position: relative;
+           overflow: hidden;
+          margin-bottom:5px;
+       }
+
+       .btn-file input[type=file] {
+               position: absolute;
+               top: 0px;
+               right: 0;
+               min-width: 100%;
+               min-height: 100%;
+               font-size: 100px;
+               text-align: right;
+               filter: alpha(opacity=0);
+               opacity: 0;
+               outline: none;
+               cursor: inherit;
+               display: block;
+           }
+       #profileUserName
+       {
+           position:absolute;
+           top:10%;
+           left:51%;
+           text-align:right;
+           font-size:45px;
+           display:block;
+       }
+       .profileBio {
+           text-align: left;
+           border:solid;
+           border-color: rgb(40, 167, 69);
+       }
+       .bioInfo {
+           color: rgb(40, 167, 69);
+       }
+       .PageContainer {
+           margin: auto;
+           width: 600px;
+           text-align: center;
        }
 
        .post-container {

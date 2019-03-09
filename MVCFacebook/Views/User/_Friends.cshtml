@@ -6,6 +6,7 @@
 
     @if (Model.Id == Usermanager.GetUserId(User))
     {
+    <h1>Friends Requests</h1>
         <partial name="_FriendRequests.cshtml" model="@Model.getPendingFriendRequests(context)" />
     }
     <h1>Friends</h1>

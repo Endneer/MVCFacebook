@@ -3,9 +3,43 @@
     ViewData["Title"] = "Search";
 }
 
-<h2>SearchResults</h2>
-@foreach (var item in Model)
-{
-    <a asp-action="Profile" asp-controller="User" asp-route-username="@item.UserName">@item.UserName</a>
-    <br />
-}
+<style>
+   
+    .nav-item {
+        color: rgb(40, 167, 69);
+        position: relative;
+       
+    }
+
+    .my-div {
+        border-style: solid;
+        border-width: 1px;
+        border-radius: 10px;
+        position: relative;
+        border-color: rgb(40, 167, 69);
+        padding: 10px;
+        margin-bottom: 5px;
+        margin-top: 5px;
+        width:300px;
+    }
+
+    .anc {
+        position: relative;
+        align-self: center;
+    }
+</style>
+<div class="col-xs-1 text-center" style="padding:10px">
+    <h2 class="nav-item">SearchResults</h2>
+    <center>
+        <div class="my-div">
+            @foreach (var item in Model)
+            {
+                <a asp-action="Profile" asp-controller="User" asp-route-username="@item.UserName">@item.UserName</a>
+                <p style="color:rgb(40, 167, 69)">First Name: @item.FirstName</p>
+                <p style="color:rgb(40, 167, 69)">Last Name: @item.LastName</p>
+                
+                <hr class="style2" style="background-color:rgb(40, 167, 69)">
+            }
+        </div>
+    </center>
+</div>

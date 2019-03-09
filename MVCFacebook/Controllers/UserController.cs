@@ -105,14 +105,33 @@ namespace MVCFacebook.Controllers
         }
 
         [HttpPost]
-        public IActionResult EditPassword(string oldPassword, string newPassword, string confirmPassword)
+        public IActionResult EditPassword(Models.UserViewModels.SettingsViewModel SettingsModel)
         {
             var user = context.Users.FirstOrDefault(u => u.Id == UM.GetUserId(User));
-            if (newPassword == confirmPassword)
-            {
-                UM.ChangePasswordAsync(user, oldPassword, newPassword).Wait();
-                context.SaveChanges();
+            if (ModelState.IsValid) { 
+                if (UM.PasswordHasher.VerifyHashedPassword(user,user.PasswordHash,SettingsModel.Old_Password) != PasswordVerificationResult.Success)
+                {
+                    ModelState.AddModelError(String.Empty, "Old Password does not match");
+                    return View("Settings", SettingsModel);
+                }
+
+                if (SettingsModel.New_Password != SettingsModel.Confirm_Password)
+                {
+                    ModelState.AddModelError(String.Empty, "New password does not match confirmation");
+                    return View("Settings", SettingsModel);
+                }
+
+                if (ModelState.IsValid)
+                {
+                    UM.ChangePasswordAsync(user, SettingsModel.Old_Password, SettingsModel.New_Password).Wait();
+                    context.SaveChanges();
+                }
             }
+            else
+            {
+                return View("Settings", SettingsModel);
+            }
+
             return RedirectToAction("Profile", new { userName = user.UserName });
         }
         #endregion

@@ -63,7 +63,7 @@ namespace MVCProjectModelAuthentication.Controllers
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 ApplicationUser user = await _userManager.FindByEmailAsync(model.Email);
-                if (user == null)
+                if (user == null || user.State == AccountState.Blocked)
                 {
                     ModelState.AddModelError(string.Empty, "No user with that E-mail found");
                     return View(model);

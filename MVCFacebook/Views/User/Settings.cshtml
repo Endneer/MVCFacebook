@@ -1,8 +1,4 @@
-﻿
-@{
-    ViewData["Title"] = "Settings";
-}
-
+﻿@model MVCFacebook.Models.UserViewModels.SettingsViewModel
 
 <br />
 <br />
@@ -11,12 +7,13 @@
     <h2>Settings</h2>
     <hr class="border-success"/>
     <form asp-action="EditPassword" asp-controller="User" method="post">
+        <div asp-validation-summary="All" class="text-danger"></div>
         <label>Enter your old password</label><br />
-        <input type="password" name="oldPassword" class="rounded-pill comment-box" /><br />
+        <input type="password" asp-for="@Model.Old_Password" class="rounded-pill comment-box" /><br />
         <label>Enter the new password</label><br />
-        <input type="password" name="newPassword" class="rounded-pill comment-box" /><br />
+        <input type="password" asp-for="@Model.New_Password" class="rounded-pill comment-box" /><br />
         <label>Confirm password</label><br />
-        <input type="password" name="confirmPassword" class="rounded-pill comment-box" /><br />
+        <input type="password" asp-for="@Model.Confirm_Password" class="rounded-pill comment-box" /><br />
         <br />
         <input type="submit" class="btn btn-outline-success my-2 my-sm-0 rounded-pill" /><br />
     </form>

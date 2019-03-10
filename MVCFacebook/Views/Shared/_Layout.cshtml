@@ -228,7 +228,7 @@
             @if (SignInManager.IsSignedIn(User))
             {
                 <form class="form-inline my-2 my-lg-0" method="get" asp-action="Search" asp-controller="User">
-                    <input class="form-control mr-sm-2" name="searchText" type="search" placeholder="Search" aria-label="Search">
+                    <input class="form-control mr-sm-2" name="searchText" type="search" placeholder="Search" aria-label="Search" required/>
                     <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
                 </form>
             }
@@ -269,6 +269,10 @@
         <script>
             $("document").ready(function () {
                 $.ajaxSetup({ cache: false });
+
+                jQuery('#some_text_box').on('input', function () {
+                    // do your stuff
+                });
             })
         </script>
 

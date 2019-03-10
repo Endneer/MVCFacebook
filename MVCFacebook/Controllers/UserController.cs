@@ -61,8 +61,9 @@ namespace MVCFacebook.Controllers
         [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Profile(string userName)
         {
-            ApplicationUser user = context.Users.Include(u => u.Posts).Include("Posts.Comments").Include("Posts.Likes").FirstOrDefault(U => U.UserName == userName);
-            user.Posts = user.Posts.Where(p => p.State == PostState.Active).ToList<Post>();
+            ApplicationUser user = context.Users.Include(u => u.Posts).Include("Posts.Comments").Include("Posts.Comments.CommentingUser")
+                .Include("Posts.Likes").Include("Posts.Likes.LikingUser")
+                .FirstOrDefault(U => U.UserName == userName);
             if (user != null)
             {
                 user.loadFriendships(context);
@@ -76,6 +77,8 @@ namespace MVCFacebook.Controllers
         [HttpGet]
         public IActionResult Search(string searchText)
         {
+
+            searchText = searchText.Trim();
             var searchResult = UM.GetUsersInRoleAsync("Member").Result.
                 Where(u => string.Concat(u.UserName, u.FirstName, u.LastName).Contains(searchText)
                           && (u.State == AccountState.Active)).ToList();
@@ -86,30 +89,43 @@ namespace MVCFacebook.Controllers
         [HttpGet]
         public IActionResult EditInfo()
         {
+            var user = context.Users.FirstOrDefault(u => u.Id == UM.GetUserId(User));
 
-            return View(context.Users.FirstOrDefault(u => u.Id == UM.GetUserId(User)));
+            Models.UserViewModels.EditInfoViewModel model = new Models.UserViewModels.EditInfoViewModel() {
+                FirstName = user.FirstName,
+                Lastname = user.LastName,
+                Biography = user.Bio
+            };
+            return View(model);
         }
 
         [HttpPost]
-        public IActionResult EditInfo(ApplicationUser viewUser)
-        {
-            var user = context.Users.FirstOrDefault(u => u.Id == viewUser.Id);
-            user.FirstName = viewUser.FirstName;
-            user.LastName = viewUser.LastName;
-            user.Bio = viewUser.Bio;
-            user.Gender = viewUser.Gender;
-            user.BirthDate = viewUser.BirthDate;
-            context.SaveChanges();
-            return RedirectToAction("Profile", new { userName = user.UserName });
+        public IActionResult EditInfo(Models.UserViewModels.EditInfoViewModel EditInfoModel)
+        {            
+            if (ModelState.IsValid)
+            {
 
+                var user = context.Users.FirstOrDefault(u => u.Id == UM.GetUserId(User));
+
+                user.FirstName = EditInfoModel.FirstName;
+                user.LastName = EditInfoModel.Lastname;
+                user.Bio = EditInfoModel.Biography;
+                context.SaveChanges();
+
+
+                return RedirectToAction("Profile", new { userName = user.UserName });
+            }
+
+            return View("EditInfo", EditInfoModel);
         }
 
         [HttpPost]
         public IActionResult EditPassword(Models.UserViewModels.SettingsViewModel SettingsModel)
         {
             var user = context.Users.FirstOrDefault(u => u.Id == UM.GetUserId(User));
-            if (ModelState.IsValid) { 
-                if (UM.PasswordHasher.VerifyHashedPassword(user,user.PasswordHash,SettingsModel.Old_Password) != PasswordVerificationResult.Success)
+            if (ModelState.IsValid)
+            {
+                if (UM.PasswordHasher.VerifyHashedPassword(user, user.PasswordHash, SettingsModel.Old_Password) != PasswordVerificationResult.Success)
                 {
                     ModelState.AddModelError(String.Empty, "Old Password does not match");
                     return View("Settings", SettingsModel);
@@ -140,9 +156,10 @@ namespace MVCFacebook.Controllers
         [HttpPost]
         public IActionResult UploadImage(IList<IFormFile> files, String id)
         {
+
             IFormFile uploadedImage = files.FirstOrDefault();
 
-            if (uploadedImage.ContentType.ToLower().StartsWith("image/"))
+            if (uploadedImage != null && uploadedImage.ContentType.ToLower().StartsWith("image/"))
             {
                 MemoryStream ms = new MemoryStream();
                 uploadedImage.OpenReadStream().CopyTo(ms);
@@ -153,7 +170,8 @@ namespace MVCFacebook.Controllers
 
                 context.SaveChanges();
             }
-            return PartialView("_UserImage", id);
+
+            return PartialView("_UserImage", context.Users.FirstOrDefault(u=>u.Id == id));
         }
 
         [HttpGet]
@@ -161,6 +179,7 @@ namespace MVCFacebook.Controllers
         public FileStreamResult ViewImage(String id)
         {
             string realId = id.Split("_")[0];
+
             ApplicationUser user = context.Users.FirstOrDefault(U => U.Id == realId);
             MemoryStream ms = new MemoryStream(user.Image);
             return new FileStreamResult(ms, user.ContentType);
@@ -180,16 +199,18 @@ namespace MVCFacebook.Controllers
                 loggedUser.createPost(post, context);
             }
 
-            if (source.StartsWith("/Profile/")) {
+            if (source.StartsWith("/Profile/"))
+            {
                 String ownerUserName = source.Split('/')[2];
-                ApplicationUser ownerUser = context.Users.FirstOrDefault(u => u.UserName == ownerUserName  );
+                ApplicationUser ownerUser = context.Users.FirstOrDefault(u => u.UserName == ownerUserName);
                 return PartialView("_listPosts", ownerUser.getPosts(false, context));
-            }                
-            return PartialView("_listPosts", loggedUser.getPosts(true,context));
+            }
+            return PartialView("_listPosts", loggedUser.getPosts(true, context));
         }
         [HttpPost]
         public IActionResult DeletePost(int post, string source)
         {
+
             var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
             var myPost = context.Posts.FirstOrDefault(p => p.ID == post);
             usr.deletePost(myPost, context);
@@ -206,9 +227,14 @@ namespace MVCFacebook.Controllers
         [HttpPost]
         public IActionResult addComment(string commentText, int postId)
         {
-            var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
-            var post = context.Posts.FirstOrDefault(p => p.ID == postId);
-            usr.commentOnPost(post, commentText, context);
+
+            if (commentText != null && commentText.Length > 0)
+            {
+                var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
+                var post = context.Posts.FirstOrDefault(p => p.ID == postId);
+                usr.commentOnPost(post, commentText, context);
+            }
+
             var postBag = context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser").FirstOrDefault(p => p.ID == postId);
             return PartialView("_listComments", postBag);
         }
@@ -221,9 +247,10 @@ namespace MVCFacebook.Controllers
             context.Entry(post).Collection(u => u.Comments).Load();
             var myComment = post.Comments.FirstOrDefault(p => p.ID == commentId);
             usr.deleteComment(myComment, context);
+
+
             var postBag = context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser").FirstOrDefault(p => p.ID == postId);
             return PartialView("_listComments", postBag);
-            // return RedirectToAction("home");
         }
         [HttpPost]
         public IActionResult toggleLike(int post)
@@ -231,6 +258,7 @@ namespace MVCFacebook.Controllers
             var usr = context.Users.FirstOrDefault(x => x.Id == signInManager.UserManager.GetUserId(HttpContext.User));
             var myPost = context.Posts.FirstOrDefault(p => p.ID == post);
             usr.toggleLike(myPost, context);
+
             var postBag = context.Posts.Include(p => p.Comments).Include(p => p.Likes).Include("Likes.LikingUser").FirstOrDefault(p => p.ID == post);
             return PartialView("_likes", postBag);
             //return RedirectToAction("home");

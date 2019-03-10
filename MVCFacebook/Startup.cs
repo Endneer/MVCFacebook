@@ -107,6 +107,7 @@ namespace MVCFacebook
                     template: "{controller=User}/{action=Index}/");
             });
 
+            #region Seeding
             //Role initialization
             if (!(Rolemanager.RoleExistsAsync("Member")).Result)
                 Rolemanager.CreateAsync(new IdentityRole()
@@ -132,13 +133,9 @@ namespace MVCFacebook
                 um.AddToRoleAsync(admin,"Admin").Wait();
                 context.SaveChanges();
             }
-            //    await userManager.CreateAsync(new ApplicationUser()
-            //    {
-            //        UserName = "Test5@Email.com",
-            //        Email = "Test5@Email.com"
-            //    }
-            //    , "GGHHgghh.123");
-            //DataSeed.SeedDatabase(context, um).Wait();
+
+            #endregion
+
         }
     }
 }

@@ -1,2 +1,12 @@
-﻿@model String
-<img src="/ViewImage/@($"{Model}_{DateTime.Now.Millisecond}")" class="profilePic" />
+﻿@model ApplicationUser
+
+@if (Model.Image != null)
+{
+    <img src="/ViewImage/@($"{Model.Id}_{DateTime.Now.Millisecond}")" class="profilePic" />
+    
+}
+else
+{
+    <img src="~/images/QM.jpg" class="profilePic" />
+}
+

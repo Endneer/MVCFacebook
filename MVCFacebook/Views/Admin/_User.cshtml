@@ -3,30 +3,73 @@
     For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 *@
 
-<div id="@Model.Id">
-    <a asp-action="Profile" asp-controller="User" asp-route-username="@Model.UserName">@Model.UserName</a>
-    @if (Model.State == AccountState.Blocked)
-    {
-        <form method="post" asp-controller="Admin" asp-action="Unblock" asp-route-id="@Model.Id"
-              data-ajax="true"
-              data-ajax-method="POST"
-              data-ajax-mode="replace"
-              data-ajax-update="#@Model.Id">
-            <input type="submit" value="Unblock" />
-        </form>
 
-    }
-    else
-    {
-        <form method="post" asp-controller="Admin" asp-action="Block" asp-route-id="@Model.Id"
-              data-ajax="true"
-              data-ajax-method="POST"
-              data-ajax-mode="replace"
-              data-ajax-update="#@Model.Id">
-            <input type="submit" value="Block" />
-        </form>
+<div id="@Model.Id" >
+   
+        <table class="table table-borderless">
+            <tr>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <td style="width:50px">
+                    
 
-    }
+                        <div id="UserImage" style="width:50px;display:flex;border-color:white" >
+                            @if (Model.Image != null)
+                            {
+                            <img src="/User/ViewImage?id=@($"{Model.Id}_{DateTime.Now.Millisecond}")" height="50" width="50" />
+                            }
+                            else
+                            {
+                                <img src="~/images/QM.jpg" height="50" width="50"/>
+                            }
+                        </div>
 
+                    
+                    </td>
+               <td>
+                    <div style="display:flex;padding-left:40px;font-size:25px;padding-left:0px;">
+                        <a style="margin-right:0px;" asp-action="Profile" asp-controller="User" asp-route-username="@Model.UserName">@Model.UserName</a>
+                    </div>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>
+                    <div style="display:flex">
+                        @if (Model.State == AccountState.Blocked)
+                        {
+                            <div>
+                                <form method="post" asp-controller="Admin" asp-action="Unblock" asp-route-id="@Model.Id"
+                                      data-ajax="true"
+                                      data-ajax-method="POST"
+                                      data-ajax-mode="replace"
+                                      data-ajax-update="#@Model.Id">
+                                    <input type="submit" value="Unblock" class="btn btn-info" style="margin-top:80px" />
+                                </form>
+                            </div>
+
+                        }
+                        else
+                        {
+                            <form method="post" asp-controller="Admin" asp-action="Block" asp-route-id="@Model.Id"
+                                  data-ajax="true"
+                                  data-ajax-method="POST"
+                                  data-ajax-mode="replace"
+                                  data-ajax-update="#@Model.Id">
+                                <input type="submit" value="Block" class="btn btn-danger " style="margin-top:80px" />
+                            </form>
+
+                        }
+                    </div>
+                </td>
+            </tr>
+        </table>
+   
     <br />
 </div>

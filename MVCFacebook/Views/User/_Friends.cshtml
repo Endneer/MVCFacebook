@@ -13,11 +13,13 @@
     <br />
     @foreach (var item in Model.Friends)
     {
-        <div>
-            <a asp-action="Profile" asp-route-username="@item.UserName"><h2 class="bioInfo">
-    @($"{item.FirstName} {item.LastName}")
-</h2></a>
-        </div>
+    <div>
+        <a asp-action="Profile" asp-route-username="@item.UserName">
+            <h2 class="bioInfo">
+                @($"{item.FirstName} {item.LastName}")
+            </h2>
+        </a>
+    </div>
     }
 </div>
 

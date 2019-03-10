@@ -1,14 +1,10 @@
 ﻿@model Post
 
-
-
-
-
 <div style="position:relative ; ">
     <form method="post" asp-action="toggleLike" asp-route-post=@Model.ID
           data-ajax="true"
           data-ajax-method="POST"
-          data-ajax-mode="replce"
+          data-ajax-mode="replace"
           data-ajax-update="@($"#like_{Model.ID}")">
         <input type="submit" value="toggle like" class="btn btn-outline-success my-2 my-sm-0">
     </form>

@@ -7,7 +7,9 @@
     <div>
         @foreach (var item in Model)
         {   
+            @if (item.State == PostState.Active) { 
                     <partial name="_post" model="item"/>
+            }
         }
     </div>
 

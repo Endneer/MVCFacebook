@@ -11,14 +11,7 @@
         <partial name="_FriendshipButton" model="Model" />
     </div>
     <div id="UserImage">
-        @if (Model.Image != null)
-        {
-            <partial name="_UserImage" model="@Model.Id" />
-        }
-        else
-        {
-            <img src="~/images/QM.jpg" class="profilePic" />
-        }
+        <partial name="_UserImage" model="@Model" />
     </div>
     <div id="profilePicEdit">
 

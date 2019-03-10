@@ -6,7 +6,7 @@
 <div id="FriendshipInteraction">
     @if (Model.Id != Usermanager.GetUserId(User))
     {
-        @if (Model.FriendRequestsSent.Any(F => F.User2ID == Usermanager.GetUserId(User) && F.Pending))
+        @if (Model.FriendRequestsSent.Any(F => F.User2ID == Usermanager.GetUserId(User) && F.Pending && F.User2!= null))
         {
             <form method="post" asp-route-id="@Model.Id" asp-route-returnPartial="FButton" asp-action="AcceptFriendRequest"
                   data-ajax="true"
@@ -16,12 +16,11 @@
                 <input type="submit" value="Accept Friend" class="btn btn-outline-success my-2 my-sm-0" />
             </form>
             <div id="rejBtn2">
-                <form asp-action="RemoveFriend" asp-route-id="@Model.Id" asp-route-returnPartial="FButton"
-                      method="post"
-                      data-ajax="true"
-                      data-ajax-method="POST"
-                      data-ajax-mode="replace"
-                      data-ajax-update="#FriendshipInteraction">
+                <form asp-action="RemoveFriend" method="post" asp-route-id="@Model.Id" asp-route-returnPartial="FButton"
+                  data-ajax="true"
+                  data-ajax-method="POST"
+                  data-ajax-mode="replace"
+                  data-ajax-update="#FriendshipInteraction">
                     <input type="submit" value=Reject class="btn btn-outline-success " />
                 </form>
             </div>

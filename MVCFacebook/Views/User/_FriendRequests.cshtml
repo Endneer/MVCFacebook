@@ -5,11 +5,13 @@
     @foreach (var item in Model)
     {
 
-        <a asp-action="Profile" asp-route-username="@item.User1.UserName" ><h2 class="bioInfo">
-      @($"{item.User1.FirstName} {item.User1.LastName}")
-</h2> </a>
+        <a asp-action="Profile" asp-route-username="@item.User1.UserName">
+            <h2 class="bioInfo">
+                @($"{item.User1.FirstName} {item.User1.LastName}")
+            </h2>
+        </a>
         <div id="acpBtn">
-            <form asp-action="AcceptFriendRequest" asp-route-id="@item.User1.Id" asp-route-return="FRequest"
+            <form asp-action="AcceptFriendRequest" asp-route-id="@item.User1.Id" asp-route-returnPartial="FRequest"
                   method="post"
                   data-ajax="true"
                   data-ajax-method="POST"
@@ -18,8 +20,8 @@
                 <input type="submit" value=Accept class="btn btn-outline-success del-button " />
             </form>
         </div>
-        <div id="rejBtn" >
-            <form asp-action="RemoveFriend" asp-route-id="@item.User1.Id" asp-route-return="FRequest"
+        <div id="rejBtn">
+            <form asp-action="RemoveFriend" asp-route-id="@item.User1.Id" asp-route-returnPartial="FRequest"
                   method="post"
                   data-ajax="true"
                   data-ajax-method="POST"

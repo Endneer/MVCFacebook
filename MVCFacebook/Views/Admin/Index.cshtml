@@ -5,27 +5,35 @@
 
 
 <h2>Admin Index</h2>
+<center>
+    <div style="width:700px;border:dotted;border-color:rgb(40, 167, 69)">
+        <a asp-action="CreateUser" class=" btn btn-success" style="float:right;margin-top:30px;margin-right:30px">Create User</a>
+        <div>
+            <div style="float:left;margin-top:30px;margin-left:30px">
+                @*<form method="get">*@
+                <form method="post" asp-controller="Admin" asp-action="Index"
+                      data-ajax="true"
+                      data-ajax-method="POST"
+                      data-ajax-mode="replace"
+                      data-ajax-update="#users-list-form">
+                    <input type="text" name="value" placeholder="Search" class="form-control" style="background-color:aliceblue;box-shadow:0px 5px 5px gray;display:flex" />
+                    <input class=" btn btn-success" type="submit" value="Search" style="float:left"/>
+                </form>
+            </div>
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
 
-<a asp-action="CreateUser">Create User</a>
 
-<div>
-    <div>
-        @*<form method="get">*@
-        <form method="post" asp-controller="Admin" asp-action="Index"
-              data-ajax="true"
-              data-ajax-method="POST"
-              data-ajax-mode="replace"
-              data-ajax-update="#users-list-form">
-            <input type="text" name="value" />
-            <input type="submit" value="Search" />
-        </form>
+            <partial name="_AdminUserList.cshtml" model="Model" />
+
+        </div>
+
+        <div> User Search </div>
+        <div> User CRUD </div>
     </div>
-
-    <partial name="_AdminUserList.cshtml" model="Model" />
-
-</div>
-
-<div> User Search </div>
-<div> User CRUD </div>
-
-
+</center>

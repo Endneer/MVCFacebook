@@ -34,10 +34,21 @@
         <div class="my-div">
             @foreach (var item in Model)
             {
+
+                @if (item.Image != null)
+                {
+                    <img src="/User/ViewImage?id=@($"{item.Id}_{DateTime.Now.Millisecond}")" height="50" width="50" />
+                }
+                else
+                {
+                    <img src="~/images/QM.jpg" height="50" width="50" />
+                }
+
+
                 <a asp-action="Profile" asp-controller="User" asp-route-username="@item.UserName">@item.UserName</a>
                 <p style="color:rgb(40, 167, 69)">First Name: @item.FirstName</p>
                 <p style="color:rgb(40, 167, 69)">Last Name: @item.LastName</p>
-                
+
                 <hr class="style2" style="background-color:rgb(40, 167, 69)">
             }
         </div>

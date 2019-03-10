@@ -1,4 +1,6 @@
 ﻿@model Post
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext context
 
 <div style="position:relative ; ">
     <form method="post" asp-action="toggleLike" asp-route-post=@Model.ID
@@ -6,7 +8,15 @@
           data-ajax-method="POST"
           data-ajax-mode="replace"
           data-ajax-update="@($"#like_{Model.ID}")">
-        <input type="submit" value="toggle like" class="btn btn-outline-success my-2 my-sm-0">
+        @if (Model.Likes.Any(L => L.UserID == UserManager.GetUserId(User)))
+        {
+            <input type="submit" value="Unlike" class="btn btn-outline-success my-2 my-sm-0">
+        }
+        else
+        {
+            <input type="submit" value="Like" class="btn btn-outline-success my-2 my-sm-0">
+        }
+
     </form>
 
     <a id="@($"like_slider_{Model.ID}")" style="position:absolute; right:2px ;top:2px" href="#"> @Model.Likes.Count Likes </a>

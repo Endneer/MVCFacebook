@@ -175,6 +175,7 @@ namespace MVCFacebook.Models
         }
 
 
+
         public ICollection<Post> getPosts(bool includeFriends, Data.ApplicationDbContext context)
         {
             if (includeFriends)

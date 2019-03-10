@@ -57,8 +57,11 @@
 
 
 <div class="profilePagePostsContainer">
-    <partial name="_addPost" />
-    <div id="listPost">
-        <partial name="_listPosts" model="Model.Posts.OrderByDescending(p=>p.CreationDate).ToList()" />
+    @if (Model.Id == Usermanager.GetUserId(User))
+    {
+        <partial name="_addPost" />
+    }
+        <div id="listPost">
+            <partial name="_listPosts" model="Model.Posts.OrderByDescending(p=>p.CreationDate).ToList()" />
+        </div>
     </div>
-</div>

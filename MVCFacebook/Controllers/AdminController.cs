@@ -42,8 +42,8 @@ namespace MVCFacebook.Controllers
             return View(context.Users.ToList());
 
         }
- 
-       [HttpPost]
+
+        [HttpPost]
         public IActionResult Index(string value)
         {
             if (value == null)
@@ -87,7 +87,6 @@ namespace MVCFacebook.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateUser(RegisterViewModel model, string returnUrl = null)
         {
@@ -108,30 +107,28 @@ namespace MVCFacebook.Controllers
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User created a new account with password.");
 
                     if (model.Admin == false)
                         await _userManager.AddToRoleAsync(user, "Member");
                     else
                         await _userManager.AddToRoleAsync(user, "Admin");
 
-
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation("User created a new account with password.");
-                    if (returnUrl == null)
-                    {
-
-                        return RedirectToAction("Index");
-                    }
-                    else
-                        return RedirectToAction("Index");
+                    return RedirectToAction("Index");
                 }
+                AddErrors(result);
             }
 
             // If we got this far, something failed, redisplay form
             return View(model);
         }
 
+        private void AddErrors(IdentityResult result)
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+        }
 
     }
 }

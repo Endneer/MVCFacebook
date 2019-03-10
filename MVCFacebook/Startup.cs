@@ -82,6 +82,27 @@ namespace MVCFacebook
                      defaults: new { action = "Settings", controller = "User" });
 
                 routes.MapRoute(
+                     name: null,
+                     template: "Home",
+                     defaults: new { action = "Home", controller = "User" });
+
+                routes.MapRoute(
+                     name: null,
+                     template: "ViewImage/{id}",
+                     defaults: new { action = "ViewImage", controller = "User" });
+
+                routes.MapRoute(
+                     name: null,
+                     template: "{action}",
+                     defaults: new { controller = "User" });
+
+
+                routes.MapRoute(
+                     name: null,
+                     template: "",
+                     defaults: new { action = "Index", controller = "User" });
+
+                routes.MapRoute(
                     name: "default",
                     template: "{controller=User}/{action=Index}/");
             });
@@ -99,6 +120,24 @@ namespace MVCFacebook
                     Name = "Admin"
                 });
 
+
+            if (!context.Users.Any(U => U.UserName == "Admin@Impostagram.com"))
+            {
+                ApplicationUser admin = new ApplicationUser()
+                {
+                    UserName = "Admin@Impostagram.com",
+                    Email = "Admin@Impostagram.com",
+                };
+                um.CreateAsync(admin , "GGHHgghh.123").Wait();
+                um.AddToRoleAsync(admin,"Admin").Wait();
+                context.SaveChanges();
+            }
+            //    await userManager.CreateAsync(new ApplicationUser()
+            //    {
+            //        UserName = "Test5@Email.com",
+            //        Email = "Test5@Email.com"
+            //    }
+            //    , "GGHHgghh.123");
             //DataSeed.SeedDatabase(context, um).Wait();
         }
     }

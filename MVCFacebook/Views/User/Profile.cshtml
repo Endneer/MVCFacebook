@@ -24,7 +24,7 @@
 
         @if (Model.Id == Usermanager.GetUserId(User))
         {
-            <form asp-action="UploadImage" asp-route-id="@Model.Id" enctype="multipart/form-data" method="post"
+            <form asp-controller="User" asp-action="UploadImage" asp-route-id="@Model.Id" enctype="multipart/form-data" method="post"
                   data-ajax="true"
                   data-ajax-method="POST"
                   data-ajax-mode="replace"

@@ -1,2 +1,2 @@
 ﻿@model String
-<img src="/User/ViewImage?id=@($"{Model}_{DateTime.Now.Millisecond}")" class="profilePic" />
+<img src="/ViewImage/@($"{Model}_{DateTime.Now.Millisecond}")" class="profilePic" />

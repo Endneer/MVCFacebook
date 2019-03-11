@@ -1,0 +1,48 @@
+﻿@model MVCFacebook.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Profile";
+}
+@inject UserManager<ApplicationUser> Usermanager
+@inject SignInManager<ApplicationUser> Signinmanager
+@inject ApplicationDbContext context
+
+    <h1 id="profileUserName">@($"{Model.FirstName} {Model.LastName}")</h1>
+    <div id="frBtn">
+        <partial name="_FriendshipButton" model="Model" />
+    </div>
+    <div id="UserImage">
+        <partial name="_UserImage" model="@Model" />
+    </div>
+    <div id="profilePicEdit">
+
+        @if (Model.Id == Usermanager.GetUserId(User))
+        {
+            <form asp-controller="User" asp-action="UploadImage" asp-route-id="@Model.Id" enctype="multipart/form-data" method="post"
+                  data-ajax="true"
+                  data-ajax-method="POST"
+                  data-ajax-mode="replace"
+                  data-ajax-update="#UserImage">
+                <span class="btn btn-outline-success  btn-file">
+                    Browse <input type="file" name="files">
+                </span>
+                <br />
+                <button class="btn btn-outline-success my-2 my-sm-0">Edit Image</button>
+            </form>
+        }
+    </div>
+    <br />
+    <div class="post-container bg-dark profileBio">
+        <p class="post-text">@Model.Bio</p>
+        <label class="bioInfo"> Gender : </label>
+        <label>@Model.Gender.ToString()</label>
+        <br />
+        <label class="bioInfo"> Birth Date : </label>
+        <label>@Model.BirthDate.ToShortDateString()</label>
+        <br />
+        @if (Model.Id == Usermanager.GetUserId(User))
+        {
+            <a asp-action="EditInfo" asp-controller="User" class="btn btn-outline-success my-2 my-sm-0">Edit Info</a>
+        }
+    </div>
+
+    <partial name="_Friends.cshtml" model="Model" />

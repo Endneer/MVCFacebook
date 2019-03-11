@@ -293,10 +293,11 @@ namespace MVCFacebook.Controllers
             ApplicationUser user = context.Users.FirstOrDefault(u => u.Id == Id);
             user.loadFriendships(context);
 
+
             if (returnPartial == "FButton")
-                return PartialView("_FriendshipButton", user);
+                return PartialView("_UserInfo", user);
             else
-                return PartialView("_Friends", LoggedInUser);
+                return PartialView("_UserInfo", LoggedInUser);
         }
 
         [HttpPost]
@@ -315,9 +316,9 @@ namespace MVCFacebook.Controllers
             user.loadFriendships(context);
 
             if (returnPartial == "FButton")
-                return PartialView("_FriendshipButton", user);
+                return PartialView("_UserInfo", user);
             else
-                return PartialView("_Friends", loggedInUser);
+                return PartialView("_UserInfo", loggedInUser);
 
         }
         #endregion
